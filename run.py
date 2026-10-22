@@ -7,8 +7,11 @@ from __future__ import annotations
 
 import argparse
 import sys
+from pathlib import Path
 
-from leadagent.config import ConfigError, list_companies, load_company
+sys.path.insert(0, str(Path(__file__).resolve().parent / "src"))  # works without install
+
+from leadagent.config import ConfigError, list_companies, load_company  # noqa: E402
 
 
 def main(argv: list[str] | None = None) -> int:

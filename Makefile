@@ -8,6 +8,8 @@ setup:
 	$(PYTHON) -m venv $(VENV)
 	$(BIN)/pip install --upgrade pip
 	$(BIN)/pip install -e ".[dev]"
+	@# macOS can flag the editable .pth as hidden, which makes Python ignore it
+	@chflags nohidden $(VENV)/lib/python3.12/site-packages/*.pth 2>/dev/null || true
 	@if [ -f web/package.json ]; then cd web && npm install; fi
 
 lint:
