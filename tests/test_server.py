@@ -126,7 +126,7 @@ def test_full_flow_to_booked_appointment(make_app):
 
     d = client.get(f"/api/leads/{lead_id}").json()
     assert d["summary"]["status"] == "booked" and d["booking"]["office_name"] == "Denver Office"
-    assert d["crm"]["stage"] == "Consultation Booked"
+    assert d["crm"]["stage"] == "Appointment Booked"
     assert [n["kind"] for n in d["notifications"]] == ["hot_lead", "booked"]
     assert d["crm"]["properties"]["consultation_time"].startswith("2026-10-27")
     assert d["flags"] == []

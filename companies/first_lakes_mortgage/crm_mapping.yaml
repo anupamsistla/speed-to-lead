@@ -1,7 +1,7 @@
 crm: hubspot
-pipeline: Mortgage Pipeline
-stage_on_create: New Inquiry
-stage_on_booked: Consultation Scheduled
+pipeline: Inbound Leads
+stage_on_create: New Lead
+stage_on_booked: Appointment Booked
 field_map:
   zip: property_zip
   loan_purpose: loan_purpose

@@ -287,7 +287,7 @@ def test_update_crm_writes_mapped_fields_and_stage(make_ctx):
     ctx, reg = make_ctx()
     qualify(reg)
     r = reg.call("update_crm", {"summary": "Owner, $250 bill, wants solar ASAP."})
-    assert r["stage"] == "New Lead" and r["pipeline"] == "Residential Sales"
+    assert r["stage"] == "New Lead" and r["pipeline"] == "Inbound Leads"
     props = r["properties_written"]
     assert props["homeowner_status"] == "owner" and props["monthly_electric_bill"] == 250.0
     assert props["lead_score"] == 90 and props["lead_tier"] == "hot"
@@ -307,7 +307,7 @@ def test_update_crm_booked_moves_stage_on_same_contact(make_ctx):
     )
     reg.call("book_appointment", {"slot_id": reg.call("get_slots", {})["slots"][0]["slot_id"]})
     second = reg.call("update_crm", {"summary": "s2", "stage_event": "booked"})
-    assert second["contact_id"] == first["contact_id"] and second["stage"] == "Consultation Booked"
+    assert second["contact_id"] == first["contact_id"] and second["stage"] == "Appointment Booked"
     assert "consultation_time" in second["properties_written"]
 
 
@@ -332,7 +332,7 @@ def test_notify_rep_hot_lead_is_urgent_with_details(make_ctx):
     r = reg.call("notify_rep", {"note": "Wants a call today"})
     assert r["priority"] == "urgent" and r["kind"] == "hot_lead" and r["rep"] == "Maya Ortiz"
     [n] = ctx.adapters.notifier.sent
-    assert n.channel == "#new-leads" and n.mention == "Maya Ortiz"
+    assert n.channel == "#inbound-leads" and n.mention == "Maya Ortiz"
     assert n.fields["Score"] == "90/100 (hot)" and n.fields["Office"] == "Denver Office"
     assert n.fields["Monthly Bill"] == "250.0" and "CRM" in n.fields
     assert n.note == "Wants a call today"

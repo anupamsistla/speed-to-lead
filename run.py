@@ -41,9 +41,12 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     import uvicorn
+    from dotenv import load_dotenv
 
     from leadagent.server import Settings, create_app
 
+    # Settings snapshots os.environ, so .env has to be loaded before it is built.
+    load_dotenv(Path(__file__).resolve().parent / ".env")
     app = create_app(Settings.from_env(default_company=args.company))
     uvicorn.run(app, host=args.host, port=args.port, log_level="warning")
     return 0

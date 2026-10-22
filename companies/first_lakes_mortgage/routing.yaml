@@ -50,4 +50,4 @@ appointment:
   lookahead_days: 7
   minimum_notice_hours: 1
 
-slack_channel: "#mortgage-leads"
+slack_channel: "#inbound-leads"

@@ -74,9 +74,9 @@ def test_both_companies_are_discovered_and_differ_in_every_config_file(mortgage)
         == 30
         != solar.routing.appointment.duration_minutes
     )
-    assert mortgage.crm_mapping.pipeline == "Mortgage Pipeline"
+    assert mortgage.crm_mapping.pipeline == "Inbound Leads"
     assert mortgage.crm_mapping.field_map["credit_range"] == "credit_band"
-    assert mortgage.routing.slack_channel == "#mortgage-leads"
+    assert mortgage.routing.slack_channel == "#inbound-leads"
     assert mortgage.company.timezone == "America/Chicago"
 
 
@@ -123,7 +123,7 @@ def test_a_hot_borrower_is_scored_routed_and_booked_with_the_mortgage_config(mor
     )
 
     crm = reg.call("update_crm", {"summary": "Hot purchase lead.", "stage_event": "booked"})
-    assert crm["pipeline"] == "Mortgage Pipeline" and crm["stage"] == "Consultation Scheduled"
+    assert crm["pipeline"] == "Inbound Leads" and crm["stage"] == "Appointment Booked"
     props = crm["properties_written"]
     assert props["credit_band"] == "740_plus" and props["branch"] == "minneapolis"
     assert props["loan_program"] == "conventional" and props["estimated_property_value"] == 450000.0
@@ -132,7 +132,7 @@ def test_a_hot_borrower_is_scored_routed_and_booked_with_the_mortgage_config(mor
 
     reg.call("notify_rep", {})
     [n] = ctx.adapters.notifier.sent
-    assert n.channel == "#mortgage-leads" and n.fields["Office"] == "Minneapolis Office"
+    assert n.channel == "#inbound-leads" and n.fields["Office"] == "Minneapolis Office"
     assert n.fields["Credit Range"] == "740_plus" and "Mortgage consultation call" not in n.title
 
 
@@ -233,7 +233,7 @@ def test_conversations_never_leak_between_companies(tmp_path):
         )
         assert (
             cfgs[SLUG]["appointment_minutes"] == 30
-            and cfgs[SLUG]["slack_channel"] == "#mortgage-leads"
+            and cfgs[SLUG]["slack_channel"] == "#inbound-leads"
         )
         assert client.get(cfgs[SLUG]["logo_url"]).headers["content-type"].startswith("image/svg")
         names = {c["name"] for c in client.get("/api/companies").json()["companies"]}

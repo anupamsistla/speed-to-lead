@@ -53,4 +53,4 @@ appointment:
   lookahead_days: 7
   minimum_notice_hours: 2
 
-slack_channel: "#new-leads"
+slack_channel: "#inbound-leads"
