@@ -192,3 +192,37 @@ def test_run_py_reports_errors(capsys):
     assert mod.main(["--company", SLUG, "--check"]) == 0
     assert mod.main(["--company", "nope"]) == 2
     assert "Available companies" in capsys.readouterr().err
+
+
+def test_choice_options_must_be_snake_case(copy_company):
+    base, root = copy_company
+    edit_yaml(
+        root / "qualification.yaml",
+        lambda d: d["required_fields"][1].update(options=["Owner", "rent er"]),
+    )
+    with pytest.raises(ConfigError, match="snake_case"):
+        load_company("acme", base=base)
+
+
+def test_rules_must_use_values_the_field_can_hold(copy_company):
+    base, root = copy_company
+
+    def typo(d):
+        d["disqualify_if"][0]["when"][0]["value"] = "tenant"
+
+    edit_yaml(root / "qualification.yaml", typo)
+    with pytest.raises(ConfigError, match="not among its options"):
+        load_company("acme", base=base)
+
+
+def test_boolean_fields_need_real_booleans_in_rules(copy_company):
+    base, root = copy_company
+
+    def make_bool(d):
+        d["required_fields"][1] = {"key": "homeowner", "type": "boolean", "question": "Own it?"}
+        d["disqualify_if"][0]["when"][0].update(field="homeowner", value="false")
+        d["score_weights"][0]["when"][0].update(field="homeowner", value=True)
+
+    edit_yaml(root / "qualification.yaml", make_bool)
+    with pytest.raises(ConfigError, match="Use true or false without quotes"):
+        load_company("acme", base=base)

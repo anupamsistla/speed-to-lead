@@ -50,3 +50,13 @@ def test_one_shared_word_is_not_an_answer(bundle):
     # "install" appears in the docs, but the question is about something else
     assert r.search("do you install pool heaters") == []
     assert r.search("how much does it cost for a 2000 sq ft house") == []
+
+
+def test_html_comments_are_not_indexed_or_served():
+    from leadagent.config.schemas import KnowledgeDoc
+
+    doc = KnowledgeDoc(
+        source="knowledge/x.md",
+        text="<!-- source: https://example.com -->\n# T\n\n## A\nalpha text\n<!-- note to editor -->\n",
+    )
+    assert chunk_markdown(doc) == [("A", "alpha text")]

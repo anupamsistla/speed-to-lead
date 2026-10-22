@@ -163,6 +163,12 @@ class FieldSpec(Strict):
     def _choice_needs_options(self) -> FieldSpec:
         if self.type == "choice" and not self.options:
             raise ValueError(f'field "{self.key}" is type choice but has no options')
+        bad = [o for o in self.options if not re.fullmatch(r"[a-z0-9][a-z0-9_]*", o)]
+        if bad:
+            raise ValueError(
+                f'field "{self.key}" options must be lowercase_snake_case (answers are matched '
+                f"that way). Fix: {bad}. Put the human wording in the question."
+            )
         return self
 
 
@@ -224,6 +230,25 @@ class QualificationConfig(Strict):
                     raise ValueError(
                         f'rule "{rule_name}" references unknown field "{c.field}". '
                         f"Known fields: {sorted(known)}"
+                    )
+        specs = {f.key: f for f in self.required_fields}
+        for rule_name, conds in rules:
+            for c in conds:
+                spec = specs.get(c.field)
+                if spec is None or c.op in ("exists", "lt", "lte", "gt", "gte"):
+                    continue
+                values = c.value if isinstance(c.value, list) else [c.value]
+                if spec.type == "choice":
+                    bad = [v for v in values if v not in spec.options]
+                    if bad:
+                        raise ValueError(
+                            f'rule "{rule_name}" compares "{c.field}" to {bad}, which are not '
+                            f"among its options {spec.options}"
+                        )
+                elif spec.type == "boolean" and any(not isinstance(v, bool) for v in values):
+                    raise ValueError(
+                        f'rule "{rule_name}" compares boolean field "{c.field}" to {values}. '
+                        "Use true or false without quotes."
                     )
         if self.warm_lead_threshold >= self.hot_lead_threshold:
             raise ValueError("warm_lead_threshold must be below hot_lead_threshold")

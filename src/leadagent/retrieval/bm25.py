@@ -44,7 +44,8 @@ def chunk_markdown(doc: KnowledgeDoc) -> list[tuple[str, str]]:
     title = ""
     sections: list[tuple[str, list[str]]] = []
     current: tuple[str, list[str]] | None = None
-    for line in doc.text.splitlines():
+    text = re.sub(r"<!--.*?-->", "", doc.text, flags=re.S)  # notes for editors, not for leads
+    for line in text.splitlines():
         m = _HEADING.match(line)
         if m and len(m.group(1)) == 1 and not title:
             title = m.group(2).strip()

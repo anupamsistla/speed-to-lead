@@ -98,9 +98,16 @@ def load_company(
     if not allow_todos:
         todos = find_todos(root)
         if todos:
+            files = len({t.file for t in todos})
             raise ConfigError(
                 slug,
-                [f"unresolved TODO (replace with a real value or remove): {t}" for t in todos],
+                [
+                    f"{len(todos)} TODO marker(s) in {files} file(s) under {root}. This is usually "
+                    "a draft from scripts/draft_company.py that still needs a human review. "
+                    "For each one, fill in the real value, or confirm the guess and delete the "
+                    "TODO comment. Find them with: grep -rn TODO " + str(root)
+                ]
+                + [f"unresolved TODO (replace with a real value or remove): {t}" for t in todos],
             )
 
     problems: list[str] = []
