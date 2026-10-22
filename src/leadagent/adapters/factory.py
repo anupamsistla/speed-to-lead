@@ -22,7 +22,12 @@ def _choice(env: Mapping[str, str], key: str, allowed: set[str]) -> str:
 
 
 def build_adapters(
-    bundle: CompanyBundle, clock: Clock, env: Mapping[str, str] | None = None
+    bundle: CompanyBundle,
+    clock: Clock,
+    env: Mapping[str, str] | None = None,
+    *,
+    mock_crm_path: str = ":memory:",
+    mock_crm_table: str = "crm_contacts",
 ) -> Adapters:
     env = os.environ if env is None else env
 
@@ -44,7 +49,7 @@ def build_adapters(
             mapped_properties=list(bundle.crm_mapping.field_map.values()),
         )
     else:
-        crm = MockCRM()
+        crm = MockCRM(mock_crm_path, mock_crm_table)
 
     calendar_kind = _choice(env, "CALENDAR_ADAPTER", {"mock", "google"})
     if calendar_kind == "google":

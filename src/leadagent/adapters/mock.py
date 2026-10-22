@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import re
 import sqlite3
+import threading
 import uuid
 from datetime import datetime, timedelta
 from typing import Any
@@ -44,13 +45,16 @@ def _digits(phone: str | None) -> str | None:
 class MockCRM:
     """Local tables in SQLite (in memory by default)."""
 
-    def __init__(self, path: str = ":memory:"):
+    def __init__(self, path: str = ":memory:", table: str = "crm_contacts"):
+        if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", table):
+            raise ValueError(f"bad table name {table!r}")
+        self.table = table
         self.db = sqlite3.connect(path, check_same_thread=False)
         self.db.row_factory = sqlite3.Row
         self.db.execute(
-            """CREATE TABLE IF NOT EXISTS crm_contacts (
+            f"""CREATE TABLE IF NOT EXISTS {table} (
                  id TEXT PRIMARY KEY, name TEXT, phone TEXT, email TEXT,
-                 properties TEXT NOT NULL DEFAULT '{}', pipeline TEXT, stage TEXT)"""
+                 properties TEXT NOT NULL DEFAULT '{{}}', pipeline TEXT, stage TEXT)"""
         )
 
     @staticmethod
@@ -68,13 +72,13 @@ class MockCRM:
     def find_contact(self, *, phone: str | None, email: str | None) -> CRMContact | None:
         if email:
             r = self.db.execute(
-                "SELECT * FROM crm_contacts WHERE lower(email)=lower(?)", (email,)
+                f"SELECT * FROM {self.table} WHERE lower(email)=lower(?)", (email,)
             ).fetchone()
             if r:
                 return self._row(r)
         digits = _digits(phone)
         if digits:
-            for r in self.db.execute("SELECT * FROM crm_contacts WHERE phone IS NOT NULL"):
+            for r in self.db.execute(f"SELECT * FROM {self.table} WHERE phone IS NOT NULL"):
                 if _digits(r["phone"]) == digits:
                     return self._row(r)
         return None
@@ -93,7 +97,7 @@ class MockCRM:
         if existing:
             merged = {**existing.properties, **properties}
             self.db.execute(
-                "UPDATE crm_contacts SET name=?, phone=?, email=?, properties=?, pipeline=?, "
+                f"UPDATE {self.table} SET name=?, phone=?, email=?, properties=?, pipeline=?, "
                 "stage=? WHERE id=?",
                 (
                     name or existing.name,
@@ -109,7 +113,7 @@ class MockCRM:
         else:
             contact_id = f"crm_{uuid.uuid4().hex[:8]}"
             self.db.execute(
-                "INSERT INTO crm_contacts VALUES (?,?,?,?,?,?,?)",
+                f"INSERT INTO {self.table} VALUES (?,?,?,?,?,?,?)",
                 (
                     contact_id,
                     name,
@@ -125,14 +129,14 @@ class MockCRM:
 
     def update_stage(self, contact_id: str, *, pipeline: str, stage: str) -> None:
         cur = self.db.execute(
-            "UPDATE crm_contacts SET pipeline=?, stage=? WHERE id=?", (pipeline, stage, contact_id)
+            f"UPDATE {self.table} SET pipeline=?, stage=? WHERE id=?", (pipeline, stage, contact_id)
         )
         if cur.rowcount == 0:
             raise KeyError(f"no CRM contact {contact_id}")
         self.db.commit()
 
     def get(self, contact_id: str) -> CRMContact:
-        r = self.db.execute("SELECT * FROM crm_contacts WHERE id=?", (contact_id,)).fetchone()
+        r = self.db.execute(f"SELECT * FROM {self.table} WHERE id=?", (contact_id,)).fetchone()
         if r is None:
             raise KeyError(contact_id)
         return self._row(r)
@@ -160,6 +164,7 @@ class MockCalendar:
         self.tz = ZoneInfo(timezone)
         self.clock = clock or SystemClock()
         self.bookings: dict[str, list[Booking]] = {r: [] for r in rep_hours}
+        self._lock = threading.Lock()  # two leads must never take the same slot
 
     def _busy(self, rep_id: str, start: datetime, end: datetime) -> bool:
         return any(b.start < end and start < b.end for b in self.bookings[rep_id])
@@ -220,6 +225,19 @@ class MockCalendar:
         self, *, slot: Slot, lead: Lead, office_id: str, office_name: str, rep_name: str, kind: str
     ) -> Booking:
         duration = int((slot.end - slot.start).total_seconds() // 60)
+        with self._lock:
+            return self._book_locked(slot, lead, office_id, office_name, rep_name, kind, duration)
+
+    def _book_locked(
+        self,
+        slot: Slot,
+        lead: Lead,
+        office_id: str,
+        office_name: str,
+        rep_name: str,
+        kind: str,
+        duration: int,
+    ) -> Booking:
         if not self.is_free(slot.rep_id, slot.start, duration):
             raise ValueError("slot is no longer available")
         booking = Booking(

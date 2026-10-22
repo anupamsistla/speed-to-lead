@@ -29,3 +29,22 @@ class FixedClock:
 
     def advance(self, **kwargs: float) -> None:
         self._now += timedelta(**kwargs)
+
+
+class OffsetClock:
+    """Real time plus an offset, so a demo can pretend it is 11pm and keep ticking from there."""
+
+    def __init__(self) -> None:
+        self._offset = timedelta(0)
+        self.simulated = False
+
+    def now(self) -> datetime:
+        return datetime.now(UTC) + self._offset
+
+    def set(self, target: datetime | None) -> None:
+        if target is None:
+            self._offset, self.simulated = timedelta(0), False
+            return
+        if target.tzinfo is None:
+            raise ValueError("simulated time needs a timezone offset")
+        self._offset, self.simulated = target - datetime.now(UTC), True

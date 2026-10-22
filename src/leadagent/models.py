@@ -30,6 +30,7 @@ class Message(BaseModel):
     body: str
     created_at: datetime
     sent: bool = True  # False when an outbound message was deferred or blocked
+    sender: Literal["lead", "agent", "human"] = "agent"
 
 
 class ToolCall(BaseModel):

@@ -343,6 +343,7 @@ def update_crm(
     )
     s.crm_contact_id = contact.id
     s.crm_stage = stage_event
+    s.crm_summary = summary
     return {
         "contact_id": contact.id,
         "pipeline": mapping.pipeline,

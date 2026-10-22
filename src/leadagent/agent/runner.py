@@ -86,8 +86,8 @@ class LeadAgent:
             reg = self._registries[session.lead.id] = ToolRegistry(ctx)
         return reg
 
-    def handle_lead(self, lead: Lead, consent: ConsentStatus | None = None) -> LeadSession:
-        """A new lead arrives. Runs the first turn on the lead's initial message."""
+    def open_session(self, lead: Lead, consent: ConsentStatus | None = None) -> LeadSession:
+        """Create the session for a new lead without running the agent yet."""
         session = LeadSession(lead=lead)
         if consent is None:
             # A person who texts us has started the conversation. A form or a missed call
@@ -95,7 +95,15 @@ class LeadAgent:
             consent = "opted_in" if lead.source == "text" else "unknown"
         session.consent = consent
         session.log_event("lead_received", self.clock.now(), source=lead.source)
-        self.handle_inbound(session, lead.message, initial=True)
+        return session
+
+    def run_first_turn(self, session: LeadSession) -> None:
+        self.handle_inbound(session, session.lead.message, initial=True)
+
+    def handle_lead(self, lead: Lead, consent: ConsentStatus | None = None) -> LeadSession:
+        """A new lead arrives. Runs the first turn on the lead's initial message."""
+        session = self.open_session(lead, consent)
+        self.run_first_turn(session)
         return session
 
     def handle_inbound(self, session: LeadSession, text: str, *, initial: bool = False) -> None:
@@ -108,6 +116,7 @@ class LeadAgent:
                 direction="inbound",
                 body=text,
                 created_at=now,
+                sender="lead",
             )
             session.messages.append(msg)
             self._emit(session, msg)

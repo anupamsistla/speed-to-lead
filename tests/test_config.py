@@ -189,6 +189,6 @@ def test_run_py_reports_errors(capsys):
     )
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
-    assert mod.main(["--company", SLUG]) == 0
+    assert mod.main(["--company", SLUG, "--check"]) == 0
     assert mod.main(["--company", "nope"]) == 2
     assert "Available companies" in capsys.readouterr().err

@@ -34,6 +34,7 @@ class LeadSession(BaseModel):
     deferred: list[DeferredMessage] = Field(default_factory=list)
     first_response_seconds: float | None = None
     closed_reason: str | None = None  # set when disqualified, out of area, or spam
+    crm_summary: str | None = None
     crm_stage: str | None = None  # last stage_event written: "created" or "booked"
     notified_kinds: list[str] = Field(default_factory=list)
     history: list[dict[str, Any]] = Field(default_factory=list)  # LLM conversation, append-only
