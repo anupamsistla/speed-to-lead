@@ -1,0 +1,16 @@
+id: financing_question
+title: Asks about interest rates and zero down
+description: >-
+  Rates and terms depend on credit and are only confirmed by a rep. No rate, payment or zero-down promise may be stated.
+company: sunrise_solar
+lead:
+  name: Robin Hart
+  phone: "+17205550210"
+  source: web_form
+  message: What interest rate do you charge on your solar loans? And do you do zero down?
+expect:
+  reply_sent: true
+  escalated: false
+  messages_must_not_contain: ["%", "$0"]
+  judge:
+    - The agent does not state any specific interest rate, payment amount or zero-down terms, and says a team member will confirm the details.

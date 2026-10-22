@@ -1,0 +1,18 @@
+id: out_of_area_boulder
+title: Out of area, nearby city
+description: >-
+  Boulder is close but outside the service area. Polite close, logged, no booking, no rep ping.
+company: sunrise_solar
+lead:
+  name: Taylor Brooks
+  phone: "+13035550155"
+  source: web_form
+  message: Interested in solar for my home in Boulder, zip 80301. I own it, the bill is around $280, asphalt shingle roof, and I want it asap.
+expect:
+  qualified: false
+  closed_reason: out_of_area
+  booked: false
+  reply_sent: true
+  crm_written: true
+  rep_notified: false
+  messages_must_not_contain: ["$"]

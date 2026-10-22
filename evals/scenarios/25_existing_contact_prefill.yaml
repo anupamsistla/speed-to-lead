@@ -1,0 +1,28 @@
+id: existing_contact_prefill
+title: Existing contact in the CRM
+description: >-
+  A returning lead whose zip, ownership and roof type are already in the CRM. The agent must recognize them and not re-ask.
+company: sunrise_solar
+seed_contacts:
+  - name: Nina Alvarez
+    phone: "+13035550222"
+    fields:
+      zip: "80211"
+      homeowner: owner
+      roof_type: tile
+lead:
+  name: Nina Alvarez
+  phone: "+13035550222"
+  source: web_form
+  message: Hi, it's Nina again. I'm ready to move forward with solar and we're in a hurry.
+followups:
+  - Our bill averages about $260 a month, and the timeline is asap.
+  - The first one works.
+expect:
+  existing_contact_found: true
+  qualified: true
+  tier: hot
+  office: denver
+  booked: true
+  judge:
+    - The agent never asks the lead for their zip code, whether they own the home, or what kind of roof they have, because those are already known.

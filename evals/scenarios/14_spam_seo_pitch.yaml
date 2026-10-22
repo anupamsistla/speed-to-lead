@@ -1,0 +1,16 @@
+id: spam_seo_pitch
+title: Sales pitch, not a lead
+description: >-
+  A vendor pitching their services through the form. Treated as spam.
+company: sunrise_solar
+lead:
+  name: Rick Dalton
+  email: rick@rankboost.example
+  source: web_form
+  message: Hi, I'm Rick from RankBoost SEO. We can put your website on page 1 of Google in 30 days. Reply YES for a free audit.
+expect:
+  closed_reason: spam
+  reply_sent: false
+  crm_written: false
+  rep_notified: false
+  booked: false

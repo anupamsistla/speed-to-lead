@@ -85,14 +85,20 @@ _INJECTION = {
     "markup_escape": re.compile(r"</?\s*(lead_message|system_note|lead_context|system)\b", re.I),
 }
 
+_PERSON = r"(person|human|someone|somebody|rep|representative|agent|manager|supervisor|salesperson)"
 _HUMAN_REQUEST = re.compile(
-    r"\b((talk|speak|chat|connect)\w*( me)? (to|with) (a |an |the |your )?(real |actual |live )?"
-    r"(person|human|someone|somebody|rep|representative|agent|manager|supervisor|salesperson)|"
-    r"real (person|human)|human being|actual person|"
-    r"(get|give|put) me (a |an |the )?(real |actual |live )?"
-    r"(person|human|rep|representative|manager)|"
-    r"(can|could|have|get) (someone|somebody|a rep|a person|a human) (call|phone|contact|reach)|"
-    r"(call|phone) me|customer service|speak to a manager)\b",
+    # a request cue, then "talk/speak/chat/connect ... <a person>". Asking *whether* the sender
+    # is a person ("am I talking to a real person?") has no cue and does not match.
+    rf"\b(want|need|prefer|wanna|rather|like|demand|please|can i|could i|may i|let me|let's)\b"
+    rf"[^.?!]{{0,25}}\b(talk|speak|chat|connect)\w*\b[^.?!]{{0,15}}\b{_PERSON}\b|"
+    rf"^\W*(speak|talk|chat) (to|with) (a |an |the )?(real |actual |live )?{_PERSON}\b|"
+    r"\b(want|need|prefer|wanna|rather|demand)\b[^.?!]{0,10}\b(a |an |the )?(real|actual|live) "
+    r"(person|human)\b|"
+    rf"\b(get|give|put|connect|transfer) me (to |with |through to )?(a |an |the )?"
+    rf"(real |actual |live )?{_PERSON}\b|"
+    r"\b(can|could|have|get) (someone|somebody|a rep|a person|a human) "
+    r"(call|phone|contact|reach)\b|"
+    r"\b(call|phone) me\b|\bcustomer service\b",
     re.I,
 )
 _ANGER = re.compile(

@@ -1,0 +1,17 @@
+id: renter_disqualified
+title: Renter
+description: >-
+  Renters cannot authorize a roof install. Polite close, logged, not booked.
+company: sunrise_solar
+lead:
+  name: Jordan Lee
+  phone: "+13035550166"
+  source: web_form
+  message: I rent an apartment in 80205 and I'd love to get solar panels on the roof.
+expect:
+  qualified: false
+  closed_reason: renter
+  booked: false
+  reply_sent: true
+  crm_written: true
+  rep_notified: false

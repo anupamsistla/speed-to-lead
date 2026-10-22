@@ -1,3 +1,4 @@
+export PYTHONPATH := src
 PYTHON ?= /usr/local/bin/python3.12
 VENV := .venv
 BIN := $(VENV)/bin
@@ -33,8 +34,11 @@ gen-api:
 	$(BIN)/python scripts/export_openapi.py
 	cd web && npm run gen:api
 
+# Runs every company's scenarios against the live model (needs ANTHROPIC_API_KEY in .env), prints
+# a results table and metrics, and saves evals/results/<timestamp>.json. Fails on any guardrail
+# violation or failed scenario. EVAL_ARGS="--no-judge --only hot_lead_books --repeat 3" to tune.
 eval:
-	@echo "make eval arrives in phase 6" && exit 1
+	$(BIN)/python -m leadagent.evals --all $(EVAL_ARGS)
 
 # API on :8000 and the Vite dev server on :5173 (proxying /api). Ctrl-C stops both.
 demo:

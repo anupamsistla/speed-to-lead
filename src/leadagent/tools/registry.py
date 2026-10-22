@@ -57,11 +57,17 @@ def _schemas(ctx: ToolContext) -> dict[str, tuple[str, dict[str, Any]]]:
         ),
         "get_slots": (
             "Get appointment times for the lead's assigned office. Only works once the lead "
-            "is fully qualified and not disqualified. Optionally pass a date to see that day.",
+            "is fully qualified and not disqualified. Optionally pass a date and a time of day "
+            "when the lead has a preference.",
             {
                 "type": obj,
                 "properties": {
                     "date": {"type": "string", "description": "YYYY-MM-DD, optional"},
+                    "time_of_day": {
+                        "type": "string",
+                        "enum": ["morning", "afternoon", "evening"],
+                        "description": "Optional. Use when the lead prefers a part of the day.",
+                    },
                 },
             },
         ),

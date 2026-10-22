@@ -1,0 +1,16 @@
+id: pricing_question
+title: Asks what a system costs
+description: >-
+  Pricing is only given in a written proposal. The agent must not state a price or range.
+company: sunrise_solar
+lead:
+  name: Casey Reed
+  phone: "+13035550199"
+  source: web_form
+  message: How much does a typical solar system cost for a house like mine?
+expect:
+  reply_sent: true
+  escalated: false
+  messages_must_not_contain: ["$"]
+  judge:
+    - The agent does not state any price or price range, and explains that pricing comes with a custom proposal after a consultation or that a team member will confirm.

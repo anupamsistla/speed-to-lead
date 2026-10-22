@@ -171,10 +171,17 @@ def _may_schedule(ctx: ToolContext) -> str | None:
     return None
 
 
-def get_slots(ctx: ToolContext, date: str | None = None) -> dict[str, Any]:
+TIME_OF_DAY = {"morning": (0, 12), "afternoon": (12, 17), "evening": (17, 24)}
+
+
+def get_slots(
+    ctx: ToolContext, date: str | None = None, time_of_day: str | None = None
+) -> dict[str, Any]:
     blocked = _may_schedule(ctx)
     if blocked:
         return err(blocked)
+    if time_of_day is not None and time_of_day not in TIME_OF_DAY:
+        return err(f"time_of_day must be one of {list(TIME_OF_DAY)}")
     s = ctx.session
     cfg = ctx.bundle.routing.appointment
     tz = ZoneInfo(ctx.bundle.company.timezone)
@@ -195,6 +202,9 @@ def get_slots(ctx: ToolContext, date: str | None = None) -> dict[str, Any]:
     free = ctx.adapters.calendar.get_slots(
         reps, start=earliest, end=latest, duration_minutes=cfg.duration_minutes
     )
+    if time_of_day:
+        lo, hi = TIME_OF_DAY[time_of_day]
+        free = [f for f in free if lo <= f.start.hour < hi]
     chosen = _pick(
         free,
         cfg.slots_to_offer,
@@ -357,15 +367,16 @@ def notify_rep(
     ctx: ToolContext, note: str | None = None, flags: list[str] | None = None
 ) -> dict[str, Any]:
     s = ctx.session
-    if not s.rep_id:
-        return err("no rep assigned (lead is disqualified or not yet routed)")
+    if s.score and s.score.tier == "disqualified":
+        return err("lead is disqualified, nothing to notify the team about")
     bad = [f for f in (flags or []) if f not in FLAG_REASONS]
     if bad:
         return err(f"unknown flags {bad}. Allowed: {list(FLAG_REASONS)}")
     for f in flags or []:
         s.add_flag(f)
 
-    rep, office = ctx.router.rep(s.rep_id)
+    # A lead that is not routed yet (no zip) still reaches the team channel, unassigned.
+    rep, office = ctx.router.rep(s.rep_id) if s.rep_id else (None, None)
     cfg = ctx.bundle.routing.hot_lead
     hot = bool(s.score and s.score.tier == "hot")
     urgent = hot and cfg.notify == "immediate"
@@ -374,8 +385,8 @@ def notify_rep(
     tier = s.score.tier if s.score else "unscored"
     fields: dict[str, str] = {
         "Score": f"{s.score.score}/100 ({tier})" if s.score else "unscored",
-        "Office": office.name,
-        "Rep": rep.name,
+        "Office": office.name if office else "Not routed yet",
+        "Rep": rep.name if rep else "Unassigned",
     }
     if s.booking:
         fields["Appointment"] = f"{s.booking.label} ({s.booking.kind})"
@@ -391,8 +402,8 @@ def notify_rep(
     if s.crm_contact_id:
         fields["CRM"] = s.crm_contact_id
 
-    mention = rep.slack_user_id
-    if urgent and cfg.slack_mention:
+    mention = rep.slack_user_id if rep else None
+    if rep and urgent and cfg.slack_mention:
         mention = rep.slack_user_id or rep.name
     notification = Notification(
         kind=kind,
@@ -404,7 +415,7 @@ def notify_rep(
         mention=mention,
         priority="urgent" if urgent else "normal",
         lead_id=s.lead.id,
-        rep_id=rep.id,
+        rep_id=rep.id if rep else None,
         created_at=ctx.clock.now(),
     )
     ctx.adapters.notifier.notify(notification)
@@ -414,7 +425,7 @@ def notify_rep(
         "kind": kind,
         "priority": notification.priority,
         "channel": notification.channel,
-        "rep": rep.name,
+        "rep": rep.name if rep else None,
     }
 
 

@@ -1,0 +1,17 @@
+id: low_bill_disqualified
+title: Electric bill too low
+description: >-
+  A homeowner whose bill is under the minimum. Closed honestly, not booked.
+company: sunrise_solar
+lead:
+  name: Chris Wong
+  phone: "+13035550168"
+  source: web_form
+  message: I own my home in 80210 and my electric bill is only about $45 a month. Roof is asphalt shingle. Interested in solar anyway.
+expect:
+  qualified: false
+  closed_reason: low_bill
+  booked: false
+  reply_sent: true
+  crm_written: true
+  rep_notified: false

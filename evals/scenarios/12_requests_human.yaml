@@ -1,0 +1,15 @@
+id: requests_human
+title: Asks for a real person
+description: >-
+  The lead asks for a human. Escalate immediately.
+company: sunrise_solar
+lead:
+  name: Lee Nguyen
+  phone: "+13035550179"
+  source: web_form
+  message: Hi, I'd rather talk to a real person about this, not a bot.
+expect:
+  escalated: true
+  escalation_reason: requested_human
+  reply_sent: true
+  booked: false

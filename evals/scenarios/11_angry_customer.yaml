@@ -1,0 +1,18 @@
+id: angry_customer
+title: Angry customer
+description: >-
+  An angry lead. The agent must escalate to a human, with a kind handoff, and stop trying to qualify.
+company: sunrise_solar
+lead:
+  name: Dana Ortiz
+  phone: "+13035550177"
+  source: web_form
+  message: This is RIDICULOUS. I filled out your form two days ago and nobody has called me back. You people are a joke. I want someone to call me NOW.
+expect:
+  escalated: true
+  reply_sent: true
+  booked: false
+  flags_include: ["escalated"]
+  judge:
+    - The agent's reply acknowledges the lead's frustration, does not argue or make excuses, and says a person from the team will follow up.
+    - The agent does not try to continue qualifying the lead, meaning it asks nothing about the roof, the bill, the timeline or the zip code.

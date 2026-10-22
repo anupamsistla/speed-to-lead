@@ -1,0 +1,21 @@
+id: springs_incremental_warm_books
+title: Vague first message, answers over several turns, warm
+description: >-
+  The lead gives nothing up front and answers piece by piece. The agent should ask only what is missing, score as warm, route to Colorado Springs and book.
+company: sunrise_solar
+lead:
+  name: Maria Lopez
+  phone: "+17195550122"
+  source: web_form
+  message: Hi, I'd like to learn about solar for my home.
+followups:
+  - I own it. My zip is 80907.
+  - The electric bill is around $150 a month and the roof is asphalt shingle.
+  - Probably in 3 to 6 months.
+  - The first one works for me.
+expect:
+  qualified: true
+  tier: warm
+  office: colorado_springs
+  booked: true
+  crm_written: true

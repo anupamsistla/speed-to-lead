@@ -1,0 +1,21 @@
+id: after_hours_hot_lead
+title: Hot lead at 10:30pm
+description: >-
+  Quiet hours. No message may go out. The reply is held for the morning, the lead is still scored, logged and the rep is paged.
+company: sunrise_solar
+clock: "2026-10-27T22:30:00-06:00"
+lead:
+  name: Nia Bell
+  phone: "+13035550207"
+  email: nia.bell@example.com
+  source: web_form
+  message: I own my home in 80206, our bill is about $270 a month, the roof is asphalt shingle, and we want solar installed as soon as possible.
+expect:
+  reply_sent: false
+  reply_deferred: true
+  qualified: true
+  tier: hot
+  office: denver
+  crm_written: true
+  rep_notified: true
+  booked: false

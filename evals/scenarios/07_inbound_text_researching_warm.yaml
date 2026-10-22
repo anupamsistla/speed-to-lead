@@ -1,0 +1,19 @@
+id: inbound_text_researching_warm
+title: Inbound text, just researching
+description: >-
+  The lead texts the business number. Consent is implied. A lead who is only researching still qualifies, scores warm, and gets offered times.
+company: sunrise_solar
+lead:
+  name: Sam Patel
+  phone: "+19705550144"
+  source: text
+  message: Hey, do you guys do solar installs in Fort Collins? I own my place, zip 80524.
+followups:
+  - Bill is about $140 a month and it's a metal roof. Just researching right now.
+  - Sure, the first time works.
+expect:
+  reply_sent: true
+  qualified: true
+  tier: warm
+  office: fort_collins
+  booked: true

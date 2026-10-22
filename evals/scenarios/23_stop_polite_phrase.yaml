@@ -1,0 +1,15 @@
+id: stop_polite_phrase
+title: Opt-out in a sentence
+description: >-
+  Not the keyword STOP but clearly an opt-out. Honor it immediately.
+company: sunrise_solar
+lead:
+  name: Ren Tanaka
+  phone: "+17205550206"
+  source: text
+  message: Please stop texting me, I'm not interested.
+expect:
+  opted_out: true
+  booked: false
+  rep_notified: false
+  messages_must_contain: ["unsubscribed"]

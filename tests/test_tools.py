@@ -349,9 +349,18 @@ def test_notify_rep_after_booking_and_flags(make_ctx):
     assert n.mention is None  # warm lead, rep has no slack id
 
 
-def test_notify_rep_rejects_unrouted_and_bad_flags(make_ctx):
+def test_notify_rep_for_an_unrouted_lead_goes_to_the_channel_unassigned(make_ctx):
+    ctx, reg = make_ctx()
+    r = reg.call("notify_rep", {"flags": ["pricing_question"], "note": "Asked about discounts"})
+    assert r["notified"] and r["rep"] is None and r["priority"] == "normal"
+    [n] = ctx.adapters.notifier.sent
+    assert n.fields["Rep"] == "Unassigned" and n.fields["Office"] == "Not routed yet"
+    assert n.rep_id is None and n.mention is None
+    assert "pricing_question" in ctx.session.flags
+
+
+def test_notify_rep_rejects_bad_flags(make_ctx):
     _, reg = make_ctx()
-    assert "no rep assigned" in reg.call("notify_rep", {})["error"]
     qualify(reg)
     assert "unknown flags" in reg.call("notify_rep", {"flags": ["spam"]})["error"]
 
@@ -359,7 +368,7 @@ def test_notify_rep_rejects_unrouted_and_bad_flags(make_ctx):
 def test_notify_rep_never_for_disqualified(make_ctx):
     ctx, reg = make_ctx()
     qualify(reg, homeowner="renter")
-    assert "error" in reg.call("notify_rep", {})
+    assert "disqualified" in reg.call("notify_rep", {})["error"]
     assert ctx.adapters.notifier.sent == []
 
 
@@ -386,3 +395,14 @@ def test_escalate_is_idempotent_and_works_unrouted(make_ctx):
 def test_escalate_validates_reason(make_ctx):
     _, reg = make_ctx()
     assert "reason" in reg.call("escalate_to_human", {"reason": "bored"})["error"]
+
+
+def test_get_slots_filters_by_time_of_day(make_ctx):
+    ctx, reg = make_ctx()
+    qualify(reg)
+    pm = reg.call("get_slots", {"date": "2026-10-29", "time_of_day": "afternoon"})
+    hours = [ctx.session.offered_slots[s["slot_id"]].start.hour for s in pm["slots"]]
+    assert hours and all(12 <= h < 17 for h in hours)
+    am = reg.call("get_slots", {"date": "2026-10-29", "time_of_day": "morning"})
+    assert all(ctx.session.offered_slots[s["slot_id"]].start.hour < 12 for s in am["slots"])
+    assert "time_of_day" in reg.call("get_slots", {"time_of_day": "midnight"})["error"]

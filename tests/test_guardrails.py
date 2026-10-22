@@ -83,7 +83,8 @@ def test_ordinary_text_is_not_injection(text):
         "let me talk to someone",
         "get me a human",
         "can someone call me",
-        "Is there an actual person there?",
+        "I want a real person",
+        "I need to speak with a live human",
         "I need customer service",
     ],
 )
@@ -91,7 +92,19 @@ def test_human_request(text):
     assert g.detect_human_request(text)
 
 
-@pytest.mark.parametrize("text", ["What is your warranty?", "I called last week", "Tuesday works"])
+@pytest.mark.parametrize(
+    "text",
+    [
+        "What is your warranty?",
+        "I called last week",
+        "Tuesday works",
+        "Is this a real person or a bot?",
+        "Is there an actual person there?",
+        "are you a human being?",
+        "Am I talking to a real person or a bot?",
+        "Is anyone there? Is this a human?",
+    ],
+)
 def test_not_human_request(text):
     assert not g.detect_human_request(text)
 

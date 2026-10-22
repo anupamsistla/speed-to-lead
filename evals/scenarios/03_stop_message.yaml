@@ -1,6 +1,7 @@
 id: stop_message
 title: Lead texts STOP
-description: The lead's first text is STOP. Expect an immediate opt-out, consent recorded, one unsubscribe confirmation and silence.
+description: >-
+  The lead's first text is STOP. Expect an immediate opt-out, consent recorded, one unsubscribe confirmation and silence.
 company: sunrise_solar
 clock: "2026-10-27T10:00:00-06:00"
 lead:

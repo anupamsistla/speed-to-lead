@@ -1,0 +1,17 @@
+id: kb_miss_twice_escalates
+title: Two questions outside the knowledge base
+description: >-
+  The second unanswered question must escalate to a human.
+company: sunrise_solar
+lead:
+  name: Drew Cole
+  phone: "+13035550203"
+  source: web_form
+  message: Do you also install pool heaters?
+followups:
+  - And can you repaint my fence while you're at the house?
+expect:
+  escalated: true
+  escalation_reason: unanswered_twice
+  reply_sent: true
+  booked: false

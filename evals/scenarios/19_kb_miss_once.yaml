@@ -1,0 +1,15 @@
+id: kb_miss_once
+title: One question outside the knowledge base
+description: >-
+  Pool heaters are not in the knowledge base. The agent says a rep will confirm and does not escalate over a single miss.
+company: sunrise_solar
+lead:
+  name: Drew Cole
+  phone: "+13035550202"
+  source: web_form
+  message: Do you also install pool heaters?
+expect:
+  reply_sent: true
+  escalated: false
+  booked: false
+  flags_any: ["unanswered_question"]

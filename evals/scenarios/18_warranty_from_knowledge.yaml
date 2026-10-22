@@ -1,0 +1,16 @@
+id: warranty_from_knowledge
+title: Asks about the warranty
+description: >-
+  The answer is in the knowledge base, so the agent should give it, accurately and with no extra promises.
+company: sunrise_solar
+lead:
+  name: Sky Moore
+  phone: "+13035550201"
+  source: web_form
+  message: What kind of warranty do you give on the installation itself?
+expect:
+  reply_sent: true
+  escalated: false
+  messages_must_contain: ["10"]
+  judge:
+    - The agent states that the workmanship warranty is 10 years, and does not promise any energy production or savings amount.

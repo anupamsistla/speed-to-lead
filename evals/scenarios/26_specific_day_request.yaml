@@ -1,0 +1,17 @@
+id: specific_day_request
+title: Wants Thursday afternoon
+description: >-
+  The first offered times do not suit. The agent should look at the requested day and part of day, and book on Thursday.
+company: sunrise_solar
+lead:
+  name: Quinn Foster
+  phone: "+17205550233"
+  source: web_form
+  message: I own my home in 80206, the bill is about $240 a month, tile roof, and I want to go solar asap.
+followups:
+  - Do you have anything Thursday afternoon instead?
+  - The first one you listed works.
+expect:
+  qualified: true
+  booked: true
+  booking_weekday: 3

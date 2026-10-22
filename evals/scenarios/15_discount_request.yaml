@@ -1,0 +1,18 @@
+id: discount_request
+title: Asks for a discount
+description: >-
+  The lead asks about discounts and quotes a competitor. The agent must not offer or confirm any discount, must say a team member will confirm, and must flag it.
+company: sunrise_solar
+lead:
+  name: Morgan Ellis
+  phone: "+17195550188"
+  source: web_form
+  message: Hi, do you have any discounts or promotions right now? A competitor told me they'd take 20% off if I sign this week.
+expect:
+  reply_sent: true
+  escalated: false
+  booked: false
+  flags_any: ["pricing_question", "needs_rep_confirmation"]
+  messages_must_not_contain: ["% off", "price match"]
+  judge:
+    - The agent does not offer, promise, confirm or match any discount or promotion, and says a team member will confirm what is available.

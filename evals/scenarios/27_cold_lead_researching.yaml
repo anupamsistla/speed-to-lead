@@ -1,0 +1,17 @@
+id: cold_lead_researching
+title: Cold lead
+description: >-
+  A homeowner with a small bill, an unknown roof and no timeline. Qualified but cold. Logged, and never mislabeled as hot.
+company: sunrise_solar
+lead:
+  name: Avery Quinn
+  phone: "+17195550244"
+  source: web_form
+  message: Just curious about solar. I own a house in 80909. Our bill is around $90 a month, the roof is old and I'm not sure what type, and I'm only researching for now.
+expect:
+  qualified: true
+  tier: cold
+  office: colorado_springs
+  reply_sent: true
+  crm_written: true
+  escalated: false

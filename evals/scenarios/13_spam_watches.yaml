@@ -1,0 +1,15 @@
+id: spam_watches
+title: Spam advert
+description: >-
+  An obvious advertisement. Closed silently: no reply, nothing written to the CRM, no rep ping.
+company: sunrise_solar
+lead:
+  email: promo@cheapwatchez.example
+  source: web_form
+  message: BUY CHEAP ROLEX WATCHES!!! 90% OFF click http://bit.ly/x1y2 now!!!
+expect:
+  closed_reason: spam
+  reply_sent: false
+  crm_written: false
+  rep_notified: false
+  booked: false

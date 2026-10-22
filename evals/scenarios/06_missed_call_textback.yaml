@@ -1,0 +1,19 @@
+id: missed_call_textback
+title: Missed call, agent texts back
+description: >-
+  A caller hung up before anyone answered. The agent texts first, then the caller explains.
+company: sunrise_solar
+lead:
+  name: Pat Kim
+  phone: "+17205550133"
+  source: missed_call
+  message: ""
+followups:
+  - Hi, yes I called about solar. I own my house in 80220, the bill is about $210 a month, asphalt shingle roof, and I'd like it done asap.
+  - The first one is great.
+expect:
+  reply_sent: true
+  qualified: true
+  tier: hot
+  office: denver
+  booked: true

@@ -1,0 +1,22 @@
+id: all_info_fort_collins_books
+title: All info in one message, Fort Collins, books
+description: >-
+  A complete lead in a single message with an email. Nothing left to ask, so the agent should go straight to offering times.
+company: sunrise_solar
+lead:
+  name: Alex Chen
+  phone: "+19705550111"
+  email: alex.chen@example.com
+  source: web_form
+  message: >-
+    Hello! I own a house at 80525 in Fort Collins. Our power bill is about $320 a month, the
+    roof is metal, and we'd like solar installed within the next month or two.
+followups:
+  - Great, the first time works.
+expect:
+  qualified: true
+  tier: hot
+  office: fort_collins
+  booked: true
+  crm_written: true
+  rep_notified: true
