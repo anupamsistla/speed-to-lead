@@ -1,4 +1,22 @@
-import type { Deferred, LeadStatus, Score } from "./types";
+import type { Deferred, LeadDetail, LeadStatus, Score } from "./types";
+
+export type ChatNotice = { id: string; at: string; text: string };
+
+/** Small in-thread lines for handoffs, like "Maya Ortiz from Sales has joined the chat". */
+export function handoffNotices(detail: LeadDetail | undefined): ChatNotice[] {
+  if (!detail) return [];
+  const rep = detail.routing.rep_name;
+  const who = rep ? `${rep} from Sales` : "A member of our Sales team";
+  const out: ChatNotice[] = [];
+  detail.events.forEach((e, i) => {
+    const at = String((e as { at?: unknown }).at ?? "");
+    if (e.type === "human_takeover") out.push({ id: `n${i}`, at, text: `${who} has taken over the chat` });
+    if (e.type === "agent_resumed") {
+      out.push({ id: `n${i}`, at, text: `${who} has left the chat` });
+    }
+  });
+  return out;
+}
 
 export function formatClock(iso: string, timeZone?: string): string {
   return new Intl.DateTimeFormat("en-US", {

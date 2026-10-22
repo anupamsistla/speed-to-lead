@@ -15,9 +15,24 @@ describe("ChatThread", () => {
       <ChatThread
         timeZone="America/Denver"
         messages={[
-          message({ id: "1", direction: "inbound", sender: "lead", body: "I own a home", created_at: at(0) }),
-          message({ id: "2", body: "Great, what's your zip?", created_at: at(5) }),
-          message({ id: "3", sender: "human", body: "Maya here, I'll call you.", created_at: at(60) }),
+          message({
+            id: "1",
+            direction: "inbound",
+            sender: "lead",
+            body: "I own a home",
+            created_at: at(0),
+          }),
+          message({
+            id: "2",
+            body: "Great, what's your zip?",
+            created_at: at(5),
+          }),
+          message({
+            id: "3",
+            sender: "human",
+            body: "Maya here, I'll call you.",
+            created_at: at(60),
+          }),
         ]}
       />,
     );
@@ -70,7 +85,9 @@ describe("ChatThread", () => {
   it("sends a quick reply with one click and disables them while sending", async () => {
     const user = userEvent.setup();
     const onSend = vi.fn();
-    const { rerender } = render(<ChatThread messages={[]} onSend={onSend} quickReplies={["STOP", "The first one works"]} />);
+    const { rerender } = render(
+      <ChatThread messages={[]} onSend={onSend} quickReplies={["STOP", "The first one works"]} />,
+    );
     await user.click(screen.getByRole("button", { name: "STOP" }));
     expect(onSend).toHaveBeenCalledWith("STOP");
     rerender(<ChatThread messages={[]} onSend={onSend} sending quickReplies={["STOP"]} />);
@@ -79,6 +96,36 @@ describe("ChatThread", () => {
 
   it("is an accessible live log", () => {
     render(<ChatThread messages={[message()]} />);
-    expect(screen.getByRole("log", { name: "Conversation" })).toHaveAttribute("aria-live", "polite");
+    expect(screen.getByRole("log", { name: "Conversation" })).toHaveAttribute(
+      "aria-live",
+      "polite",
+    );
+  });
+
+  it("places handoff notices between messages by time", () => {
+    render(
+      <ChatThread
+        messages={[
+          message({ id: "a", body: "Before", created_at: at(1) }),
+          message({ id: "b", body: "After", created_at: at(5) }),
+        ]}
+        notices={[
+          {
+            id: "n1",
+            at: at(3),
+            text: "Maya Ortiz from Sales has taken over the chat",
+          },
+        ]}
+      />,
+    );
+    const log = screen.getByRole("log", { name: "Conversation" });
+    const text = log.textContent ?? "";
+    expect(text.indexOf("Before")).toBeLessThan(
+      text.indexOf("Maya Ortiz from Sales has taken over the chat"),
+    );
+    expect(text.indexOf("Maya Ortiz from Sales has taken over the chat")).toBeLessThan(
+      text.indexOf("After"),
+    );
+    expect(screen.getByTestId("chat-notice")).toBeInTheDocument();
   });
 });

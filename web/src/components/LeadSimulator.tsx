@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { handoffNotices } from "../lib";
 import type { LeadDetail, LeadIn, ScenarioBrief } from "../types";
 import { ChatThread } from "./ChatThread";
 import { ScenarioReplay } from "./ScenarioReplay";
@@ -185,6 +186,7 @@ export function LeadSimulator(p: Props) {
             <ChatThread
               messages={p.detail?.messages ?? []}
               deferred={p.detail?.deferred}
+              notices={handoffNotices(p.detail)}
               typing={p.typing}
               timeZone={p.timeZone}
               onSend={p.onReply}

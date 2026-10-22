@@ -96,13 +96,11 @@ const GUARDRAIL_LABEL: Record<string, string> = {
   injection_detected: "Prompt-injection text flagged",
   backstop: "Safety net completed a step",
   human_takeover: "Human took over",
-  agent_resumed: "Handed back to agent",
+  agent_resumed: "Human handed back",
   llm_error: "Model unavailable",
   model_refusal: "Model declined",
   max_steps: "Step limit reached",
   ignored_after_opt_out: "Ignored message after opt-out",
-  ignored_after_escalation: "Lead replied",
-  ignored_human_takeover: "Lead replied",
   deferred_delivered: "Held message delivered",
 };
 
@@ -118,9 +116,7 @@ function guardrailDetail(e: GuardrailEvent): string {
 /** Handoff events are about people, not safety, so they get a timeline divider instead of a warning box. */
 const HANDOFF_DETAIL: Record<string, string> = {
   human_takeover: "Agent is now silent",
-  agent_resumed: "Agent replies from the next message",
-  ignored_human_takeover: "Agent stayed silent, a person has it",
-  ignored_after_escalation: "Agent stayed silent, a person has it",
+  agent_resumed: "Agent active again",
 };
 
 function PersonIcon() {

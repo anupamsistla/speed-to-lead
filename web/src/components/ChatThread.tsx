@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { formatClock } from "../lib";
+import { formatClock, type ChatNotice } from "../lib";
 import type { Deferred, Message } from "../types";
 import { EmptyState } from "./ui";
 
@@ -14,6 +14,8 @@ interface Props {
   sending?: boolean;
   quickReplies?: string[];
   label?: string;
+  /** Small centered lines in the thread (handoffs), placed by time. */
+  notices?: ChatNotice[];
   /** Composer wording. Defaults suit the lead simulator. */
   inputLabel?: string;
   placeholder?: string;
@@ -35,6 +37,7 @@ export function ChatThread({
   sending = false,
   quickReplies = [],
   label = "Conversation",
+  notices = [],
   inputLabel = "Reply as the lead",
   placeholder = "Reply as the lead…",
   sendLabel = "Send",
@@ -53,6 +56,33 @@ export function ChatThread({
     setDraft("");
   };
 
+  const renderMessage = (m: Message) => {
+    const who = WHO[m.sender ?? "agent"];
+    const mine = who.side === "right";
+    return (
+      <div
+        key={m.id}
+        className={`flex animate-rowIn flex-col ${mine ? "items-end" : "items-start"}`}
+      >
+        <div
+          data-sender={m.sender}
+          className={`max-w-[85%] whitespace-pre-wrap rounded-2xl px-3.5 py-2 text-sm leading-snug ${
+            mine
+              ? m.sender === "human"
+                ? "rounded-br-sm bg-slate-800 text-white"
+                : "rounded-br-sm bg-brand text-brand-fg"
+              : "rounded-bl-sm bg-white text-slate-800 shadow-sm ring-1 ring-slate-200"
+          }`}
+        >
+          {m.body}
+        </div>
+        <span className="mt-1 px-1 text-[11px] text-slate-400">
+          {who.label} · {formatClock(m.created_at, timeZone)}
+        </span>
+      </div>
+    );
+  };
+
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div
@@ -65,29 +95,26 @@ export function ChatThread({
           <EmptyState title="No messages yet" hint="Submit a lead to start the conversation." />
         )}
 
-        {messages.map((m) => {
-          const who = WHO[m.sender ?? "agent"];
-          const mine = who.side === "right";
-          return (
-            <div key={m.id} className={`flex animate-rowIn flex-col ${mine ? "items-end" : "items-start"}`}>
+        {[
+          ...messages.map((m) => ({ kind: "m" as const, at: m.created_at, m })),
+          ...notices.map((n) => ({ kind: "n" as const, at: n.at, n })),
+        ]
+          .sort((a, b) => Date.parse(a.at) - Date.parse(b.at))
+          .map((item) =>
+            item.kind === "n" ? (
               <div
-                data-sender={m.sender}
-                className={`max-w-[85%] whitespace-pre-wrap rounded-2xl px-3.5 py-2 text-sm leading-snug ${
-                  mine
-                    ? m.sender === "human"
-                      ? "rounded-br-sm bg-slate-800 text-white"
-                      : "rounded-br-sm bg-brand text-brand-fg"
-                    : "rounded-bl-sm bg-white text-slate-800 shadow-sm ring-1 ring-slate-200"
-                }`}
+                key={item.n.id}
+                data-testid="chat-notice"
+                className="flex animate-rowIn items-center gap-3 py-1"
               >
-                {m.body}
+                <span className="h-px flex-1 bg-slate-200" aria-hidden />
+                <span className="shrink-0 text-[11px] text-slate-500">{item.n.text}</span>
+                <span className="h-px flex-1 bg-slate-200" aria-hidden />
               </div>
-              <span className="mt-1 px-1 text-[11px] text-slate-400">
-                {who.label} · {formatClock(m.created_at, timeZone)}
-              </span>
-            </div>
-          );
-        })}
+            ) : (
+              renderMessage(item.m)
+            ),
+          )}
 
         {deferred.map((d, i) => (
           <div key={`d${i}`} className="flex flex-col items-end">

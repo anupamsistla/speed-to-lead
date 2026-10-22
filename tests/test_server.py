@@ -369,6 +369,20 @@ def test_takeover_silences_the_agent_and_human_messages_are_labelled(make_app):
     assert len(human_events) == 1
 
 
+def test_handing_back_returns_the_lead_to_the_agent(make_app):
+    client, llm, _ = make_app(list(FIRST_TURN))
+    lead_id = client.post("/api/leads", json=FORM).json()["lead_id"]
+    assert client.post(f"/api/leads/{lead_id}/takeover").json()["status"] == "human"
+    r = client.post(f"/api/leads/{lead_id}/resume").json()
+    assert r["status"] != "human"
+    d = client.get(f"/api/leads/{lead_id}").json()
+    assert d["summary"]["status"] != "human"
+    assert [e["type"] for e in d["events"] if e["type"].startswith(("human", "agent"))] == [
+        "human_takeover",
+        "agent_resumed",
+    ]
+
+
 def test_escalation_is_visible_in_the_api(make_app):
     client, _, _ = make_app([reply(text("on it"))])
     lead_id = client.post(

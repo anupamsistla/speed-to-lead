@@ -258,7 +258,9 @@ describe("RepView", () => {
 describe("RepView conversation", () => {
   it("hides the conversation until a human has taken over", () => {
     render(<RepView detail={detail()} config={cfg} />);
-    expect(screen.queryByRole("region", { name: "Lead conversation" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("region", { name: "Lead conversation" }),
+    ).not.toBeInTheDocument();
   });
 
   it("shows what the lead writes, including after a takeover", () => {
@@ -286,10 +288,32 @@ describe("RepView conversation", () => {
     const user = userEvent.setup();
     const onResume = vi.fn();
     const human = detail({ summary: { ...detail().summary, status: "human" } });
-    const { rerender } = render(<RepView detail={human} config={cfg} onResume={onResume} />);
-    await user.click(screen.getByRole("button", { name: "Hand back to agent" }));
+    const { rerender } = render(
+      <RepView detail={human} config={cfg} onResume={onResume} />,
+    );
+    await user.click(
+      screen.getByRole("button", { name: "Hand back to agent" }),
+    );
     expect(onResume).toHaveBeenCalled();
     rerender(<RepView detail={detail()} config={cfg} onResume={onResume} />);
-    expect(screen.queryByRole("button", { name: "Hand back to agent" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Hand back to agent" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("names the rep in the thread when they take over or hand back", () => {
+    const d = detail({
+      summary: { ...detail().summary, status: "human" },
+      events: [
+        { type: "human_takeover", at: at(2) },
+        { type: "agent_resumed", at: at(3) },
+      ],
+    });
+    render(<RepView detail={d} config={cfg} />);
+    const notices = screen.getAllByTestId("chat-notice");
+    expect(notices[0]).toHaveTextContent(
+      "Maya Ortiz from Sales has taken over the chat",
+    );
+    expect(notices[1]).toHaveTextContent("Maya Ortiz from Sales has left the chat");
   });
 });

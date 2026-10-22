@@ -82,7 +82,10 @@ export function useTakeover(leadId: string | null) {
   return useMutation({
     mutationFn: () =>
       unwrap(api.POST("/api/leads/{lead_id}/takeover", { params: { path: { lead_id: leadId! } } })),
-    onSuccess: () => qc.invalidateQueries({ queryKey: keys.lead(leadId!) }),
+    onSuccess: (summary) => {
+      qc.setQueryData<LeadDetail | undefined>(keys.lead(leadId!), (d) => d && { ...d, summary });
+      qc.invalidateQueries({ queryKey: keys.lead(leadId!) });
+    },
   });
 }
 
@@ -91,7 +94,10 @@ export function useResume(leadId: string | null) {
   return useMutation({
     mutationFn: () =>
       unwrap(api.POST("/api/leads/{lead_id}/resume", { params: { path: { lead_id: leadId! } } })),
-    onSuccess: () => qc.invalidateQueries({ queryKey: keys.lead(leadId!) }),
+    onSuccess: (summary) => {
+      qc.setQueryData<LeadDetail | undefined>(keys.lead(leadId!), (d) => d && { ...d, summary });
+      qc.invalidateQueries({ queryKey: keys.lead(leadId!) });
+    },
   });
 }
 

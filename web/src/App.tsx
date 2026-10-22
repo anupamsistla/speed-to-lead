@@ -209,6 +209,9 @@ export default function App() {
               onHumanMessage={(text) => human.mutate(text)}
               onResume={() => resume.mutate()}
               actionPending={takeover.isPending || resume.isPending}
+              actionError={
+                takeover.error?.message ?? resume.error?.message ?? null
+              }
             />
           </Panel>
 

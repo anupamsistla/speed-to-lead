@@ -149,19 +149,23 @@ describe("summaries", () => {
     expect(summarizeResult("anything", { error: "boom" })).toBe("boom");
   });
 
-  it("shows human handoffs as a divider, not a warning", () => {
+  it("shows only the takeover and hand-back as handoff dividers", () => {
     render(
       <AgentTrace
         toolCalls={[]}
         guardrailEvents={[
           { type: "human_takeover", at: at(1) },
-          { type: "ignored_human_takeover", at: at(2) },
+          { type: "ignored_human_takeover", at: at(2) }, // not shown
+          { type: "agent_resumed", at: at(3) },
         ]}
       />,
     );
     const rows = within(screen.getByRole("list", { name: "Agent Trace" })).getAllByRole("listitem");
+    expect(rows).toHaveLength(2);
     expect(rows[0]).toHaveAttribute("data-kind", "handoff");
     expect(rows[0]).toHaveTextContent("Human took over");
-    expect(rows[1]).toHaveTextContent("Lead replied");
+    expect(rows[1]).toHaveAttribute("data-kind", "handoff");
+    expect(rows[1]).toHaveTextContent("Human handed back");
+    expect(rows[1]).toHaveTextContent("Agent active again");
   });
 });

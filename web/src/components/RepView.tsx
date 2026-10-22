@@ -4,6 +4,7 @@ import {
   humanize,
   STATUS_LABEL,
   TIER_STYLE,
+  handoffNotices,
 } from "../lib";
 import type { CompanyConfig, LeadDetail, Notification } from "../types";
 import { ChatThread } from "./ChatThread";
@@ -417,6 +418,8 @@ interface Props {
   onTakeover?: () => void;
   onHumanMessage?: (text: string) => void;
   onResume?: () => void;
+  /** Message from a failed take over or hand back. */
+  actionError?: string | null;
   actionPending?: boolean;
 }
 
@@ -430,6 +433,7 @@ export function RepView({
   onHumanMessage,
   onResume,
   actionPending,
+  actionError,
 }: Props) {
   if (error)
     return (
@@ -488,6 +492,15 @@ export function RepView({
         )}
       </div>
 
+      {actionError && (
+        <p
+          role="alert"
+          className="rounded-lg bg-rose-50 px-3 py-2 text-xs text-rose-800"
+        >
+          {actionError}
+        </p>
+      )}
+
       {human && (
         <section
           aria-label="Lead conversation"
@@ -506,6 +519,7 @@ export function RepView({
               label="Live messages"
               messages={detail.messages}
               deferred={detail.deferred}
+              notices={handoffNotices(detail)}
               timeZone={config.timezone}
               onSend={onHumanMessage}
               inputLabel="Message as rep"
