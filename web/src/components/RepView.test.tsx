@@ -50,7 +50,7 @@ describe("RepView", () => {
     };
     d.routing = { office_id: null, office_name: null, rep_id: null, rep_name: null, reason: "Zip 10001 is outside the service area." };
     render(<RepView detail={d} config={cfg} />);
-    expect(screen.getByTestId("score-value")).toHaveTextContent("—");
+    expect(screen.getByTestId("score-value")).toHaveTextContent("n/a");
     expect(screen.getByText("Disqualified")).toBeInTheDocument();
     expect(screen.getAllByText(/outside the service area/).length).toBeGreaterThan(0);
     expect(screen.getByText(/Not booked/)).toBeInTheDocument();

@@ -76,7 +76,7 @@ export function FirstResponseTimer({ phase, startedAtMs, seconds, queuedUntil, t
       </div>
 
       <div className={`mt-1 font-mono text-5xl font-semibold tabular-nums leading-none ${tone}`}>
-        {phase === "idle" && "—"}
+        {phase === "idle" && "--"}
         {(phase === "running" || phase === "done") && formatSeconds(shown)}
         {phase === "queued" && <span className="text-3xl">Queued</span>}
         {phase === "silent" && <span className="text-3xl">No reply</span>}

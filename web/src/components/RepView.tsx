@@ -28,7 +28,7 @@ export function ScoreCard({ detail, config }: { detail: LeadDetail; config: Comp
       <div className="flex items-end justify-between">
         <div className="flex items-baseline gap-1">
           <span data-testid="score-value" className="text-5xl font-semibold tabular-nums">
-            {score.tier === "disqualified" ? "—" : score.score}
+            {score.tier === "disqualified" ? "n/a" : score.score}
           </span>
           {score.tier !== "disqualified" && <span className="text-sm text-slate-500">/ 100</span>}
         </div>

@@ -8,7 +8,7 @@ describe("FirstResponseTimer", () => {
   it("shows a dash before any lead", () => {
     render(<FirstResponseTimer phase="idle" />);
     expect(screen.getByRole("timer")).toHaveAttribute("data-phase", "idle");
-    expect(screen.getByText("—")).toBeInTheDocument();
+    expect(screen.getByText("--")).toBeInTheDocument();
     expect(screen.getByText(/starts when a lead is submitted/i)).toBeInTheDocument();
   });
 
