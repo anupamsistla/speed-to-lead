@@ -33,11 +33,25 @@ class LeadSession(BaseModel):
     messages: list[Message] = Field(default_factory=list)
     deferred: list[DeferredMessage] = Field(default_factory=list)
     first_response_seconds: float | None = None
-    closed_reason: str | None = None  # set when disqualified or out of area
+    closed_reason: str | None = None  # set when disqualified, out of area, or spam
+    crm_stage: str | None = None  # last stage_event written: "created" or "booked"
+    notified_kinds: list[str] = Field(default_factory=list)
+    history: list[dict[str, Any]] = Field(default_factory=list)  # LLM conversation, append-only
+    events: list[dict[str, Any]] = Field(default_factory=list)  # guardrail and system events
 
     def add_flag(self, flag: str) -> None:
         if flag not in self.flags:
             self.flags.append(flag)
+
+    def log_event(self, type_: str, at: datetime, **detail: Any) -> None:
+        self.events.append({"type": type_, "at": at.isoformat(), **detail})
+
+    def inbound_text(self) -> str:
+        """Everything the lead has said, used to allow numbers they supplied themselves."""
+        parts = [m.body for m in self.messages if m.direction == "inbound"]
+        parts.append(self.lead.message)
+        parts.extend(str(v) for v in self.fields.values())
+        return "\n".join(p for p in parts if p)
 
     def values(self) -> dict[str, Any]:
         """Qualification fields plus contact fields, as seen by scoring conditions."""

@@ -91,6 +91,12 @@ def _schemas(ctx: ToolContext) -> dict[str, tuple[str, dict[str, Any]]]:
                 "properties": {
                     "summary": {"type": "string", "description": "2-4 factual sentences"},
                     "stage_event": {"type": "string", "enum": ["created", "booked"]},
+                    "outcome": {
+                        "type": "string",
+                        "enum": ["lead", "spam"],
+                        "description": "Use 'spam' for obvious spam or bots. Nothing is written "
+                        "to the CRM and the lead is closed silently.",
+                    },
                 },
                 "required": ["summary"],
             },

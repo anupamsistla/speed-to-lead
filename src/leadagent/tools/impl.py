@@ -13,7 +13,7 @@ from zoneinfo import ZoneInfo
 
 from leadagent import scoring
 from leadagent.crm_mapping import from_crm_properties, internal_values, to_crm_properties
-from leadagent.guardrails import in_quiet_hours, quiet_hours_end
+from leadagent.guardrails import find_unsupported_claims, in_quiet_hours, quiet_hours_end
 from leadagent.models import Notification, Slot
 from leadagent.session import DeferredMessage
 from leadagent.tools.context import ToolContext
@@ -278,6 +278,21 @@ def send_message(ctx: ToolContext, body: str) -> dict[str, Any]:
     if s.human_takeover:
         return {"sent": False, "blocked": "human_takeover"}
 
+    knowledge = "\n".join(d.text for d in ctx.bundle.knowledge)
+    problems = find_unsupported_claims(body, knowledge, s.inbound_text())
+    if problems:
+        s.add_flag("unsupported_claim_blocked")
+        s.log_event("claim_blocked", ctx.clock.now(), problems=problems)
+        return {
+            "sent": False,
+            "blocked": "unsupported_claim",
+            "problems": problems,
+            "instruction": (
+                "Rewrite without these claims. Say a rep will confirm that detail, and call "
+                "notify_rep with the matching flag so the rep follows up."
+            ),
+        }
+
     now = ctx.clock.now()
     if in_quiet_hours(ctx.bundle.company, now):
         deliver_after = quiet_hours_end(ctx.bundle.company, now)
@@ -296,11 +311,20 @@ def send_message(ctx: ToolContext, body: str) -> dict[str, Any]:
 
 
 # ------------------------------------------------------------------ 7 update_crm
-def update_crm(ctx: ToolContext, summary: str, stage_event: str = "created") -> dict[str, Any]:
+def update_crm(
+    ctx: ToolContext, summary: str, stage_event: str = "created", outcome: str = "lead"
+) -> dict[str, Any]:
     s = ctx.session
     mapping = ctx.bundle.crm_mapping
     if stage_event not in ("created", "booked"):
         return err("stage_event must be 'created' or 'booked'")
+    if outcome not in ("lead", "spam"):
+        return err("outcome must be 'lead' or 'spam'")
+    if outcome == "spam":
+        # Spam is logged in our own records, never pushed into the company's CRM pipeline.
+        s.closed_reason = "spam"
+        s.add_flag("spam")
+        return {"logged": True, "crm_written": False, "outcome": "spam"}
     if stage_event == "booked" and not s.booking:
         return err("cannot move to the booked stage before an appointment is booked")
     summary = (summary or "").strip()
@@ -318,6 +342,7 @@ def update_crm(ctx: ToolContext, summary: str, stage_event: str = "created") -> 
         stage=stage,
     )
     s.crm_contact_id = contact.id
+    s.crm_stage = stage_event
     return {
         "contact_id": contact.id,
         "pipeline": mapping.pipeline,
@@ -382,6 +407,7 @@ def notify_rep(
         created_at=ctx.clock.now(),
     )
     ctx.adapters.notifier.notify(notification)
+    s.notified_kinds.append(kind)
     return {
         "notified": True,
         "kind": kind,

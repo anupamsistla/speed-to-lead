@@ -65,3 +65,34 @@ HOT_FIELDS = {
     "roof_type": "asphalt shingle",
     "timeline": "asap",
 }
+
+
+@pytest.fixture
+def make_agent(bundle, clock):
+    """Factory: a LeadAgent on mock adapters driven by a ScriptedLLM."""
+    from leadagent.agent import LeadAgent
+    from leadagent.llm import ScriptedLLM
+
+    def _make(steps=None, **kwargs):
+        llm = ScriptedLLM(steps)
+        adapters = build_adapters(bundle, clock, env={})
+        tool_calls: list = []
+        agent = LeadAgent(bundle, adapters, llm, clock, record_tool=tool_calls.append, **kwargs)
+        agent.tool_calls = tool_calls  # type: ignore[attr-defined]
+        return agent, llm, adapters
+
+    return _make
+
+
+@pytest.fixture
+def new_lead(clock):
+    def _lead(**kw):
+        kw.setdefault("id", "lead1")
+        kw.setdefault("name", "Jamie Rivera")
+        kw.setdefault("phone", "+13035550142")
+        kw.setdefault("source", "web_form")
+        kw.setdefault("message", "I'm interested in solar for my house.")
+        kw.setdefault("created_at", clock.now())
+        return Lead(**kw)
+
+    return _lead
