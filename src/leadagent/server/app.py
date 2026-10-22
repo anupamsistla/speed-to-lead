@@ -8,7 +8,9 @@ import logging
 import mimetypes
 from collections.abc import AsyncIterator, Callable
 from contextlib import asynccontextmanager
+from datetime import datetime, timedelta
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 from dotenv import load_dotenv
 from fastapi import BackgroundTasks, Depends, FastAPI, Header, HTTPException, Query, Request
@@ -23,6 +25,7 @@ from leadagent.config.loader import REPO_ROOT
 from leadagent.config.schemas import CompanyBundle
 from leadagent.llm import LLM
 from leadagent.models import Message
+from leadagent.scenarios import load_scenario, load_scenarios
 from leadagent.server.events import EventBus
 from leadagent.server.logging_setup import configure_logging
 from leadagent.server.runtime import CompanyRuntime, RuntimeManager, Settings
@@ -44,6 +47,8 @@ from leadagent.server.schemas import (
     MissedCallWebhook,
     OfficeBrief,
     QualificationFieldView,
+    ScenarioBrief,
+    ScenarioList,
     SmsWebhook,
     StreamEvent,
     WebFormWebhook,
@@ -74,6 +79,7 @@ def public_config(bundle: CompanyBundle, slug: str) -> CompanyPublicConfig:
         tone=" ".join(c.tone.split()),
         reply_signature=c.reply_signature,
         hot_lead_threshold=q.hot_lead_threshold,
+        warm_lead_threshold=q.warm_lead_threshold,
         appointment_kind=r.appointment.kind,
         appointment_minutes=r.appointment.duration_minutes,
         fields=[
@@ -209,13 +215,28 @@ def create_app(
     def get_clock() -> ClockOut:
         return ClockOut(now=clock.now(), simulated=bool(getattr(clock, "simulated", False)))
 
+    def resolve_preset(preset: str, company: str | None) -> datetime | None:
+        if preset == "real":
+            return None
+        slug = company or default_company()
+        try:
+            tz = ZoneInfo(load_company(slug).company.timezone)
+        except ConfigError as e:
+            raise HTTPException(404, f"unknown company '{slug}'") from e
+        day = datetime.now(tz)
+        while day.weekday() >= 5:  # roll weekends forward to Monday
+            day += timedelta(days=1)
+        hour, minute = (10, 0) if preset == "business_hours" else (22, 30)
+        return day.replace(hour=hour, minute=minute, second=0, microsecond=0)
+
     @app.put("/api/clock", response_model=ClockOut, tags=["system"])
     def set_clock(body: ClockIn) -> ClockOut:
         """Pretend it is a different time (for example 11pm to demo quiet hours)."""
         if not hasattr(clock, "set"):
             raise HTTPException(409, "this clock cannot be changed")
+        target = resolve_preset(body.preset, body.company) if body.preset else body.now
         try:
-            clock.set(body.now)  # type: ignore[attr-defined]
+            clock.set(target)  # type: ignore[attr-defined]
         except ValueError as e:
             raise HTTPException(422, str(e)) from e
         return get_clock()
@@ -312,6 +333,50 @@ def create_app(
         if msg is None:
             raise HTTPException(404, f"unknown lead '{lead_id}'")
         return msg
+
+    # ---------------------------------------------------------------- scenarios
+    @app.get("/api/scenarios", response_model=ScenarioList, tags=["scenarios"])
+    def scenarios(company: str | None = None) -> ScenarioList:
+        """Saved scenarios from evals/scenarios, for repeatable demos."""
+        found = load_scenarios(company or default_company())
+        return ScenarioList(
+            scenarios=[
+                ScenarioBrief(
+                    id=s.id,
+                    title=s.title,
+                    description=s.description,
+                    company=s.company,
+                    source=s.lead.source,
+                    followups=len(s.followups),
+                    clock=s.clock,
+                )
+                for s in found
+            ]
+        )
+
+    @app.post(
+        "/api/scenarios/{scenario_id}/replay",
+        response_model=Accepted,
+        status_code=202,
+        tags=["scenarios"],
+    )
+    def replay_scenario(
+        scenario_id: str, background: BackgroundTasks, pause: float = Query(1.5, ge=0, le=10)
+    ) -> Accepted:
+        """Play a saved scenario through: set the clock, seed the CRM, submit the lead, then
+        send each follow-up after the agent has replied."""
+        scenario = load_scenario(scenario_id)
+        if scenario is None:
+            raise HTTPException(404, f"unknown scenario '{scenario_id}'")
+        need_llm()
+        rt = runtime(scenario.company)
+        if scenario.clock is not None and hasattr(clock, "set"):
+            clock.set(scenario.clock)  # type: ignore[attr-defined]
+        rt.seed_contacts(scenario)
+        data = make_lead(company=scenario.company, **scenario.lead.model_dump())
+        session = rt.create_lead(data)
+        background.add_task(rt.play_followups, session.lead.id, scenario.followups, pause)
+        return Accepted(lead_id=session.lead.id, created_at=session.lead.created_at)
 
     # ------------------------------------------------------------------- events
     @app.get("/api/leads/{lead_id}/events/history", response_model=EventHistory, tags=["events"])

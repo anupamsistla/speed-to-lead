@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Neutral fallback until the active company's branding loads. Real values are applied at
+   runtime by applyBrand() from the company config, never hardcoded per company. */
+:root {
+  --brand-rgb: 71 85 105;
+  --brand-fg-rgb: 255 255 255;
+  --brand-soft-rgb: 241 245 249;
+  --brand-strong-rgb: 51 65 85;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-slate-100 text-slate-900 antialiased;
+}
+
+@layer components {
+  .card {
+    @apply rounded-xl border border-slate-200 bg-white shadow-sm;
+  }
+  .label {
+    @apply text-[11px] font-semibold uppercase tracking-wider text-slate-500;
+  }
+}

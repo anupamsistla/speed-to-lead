@@ -1,0 +1,17 @@
+id: stop_message
+title: Lead texts STOP
+description: The lead's first text is STOP. Expect an immediate opt-out, consent recorded, one unsubscribe confirmation and silence.
+company: sunrise_solar
+clock: "2026-10-27T10:00:00-06:00"
+lead:
+  name: Sam Okafor
+  phone: "+17205550101"
+  source: text
+  message: STOP
+followups:
+  - Wait, how much does it cost?
+expect:
+  opted_out: true
+  booked: false
+  rep_notified: false
+  messages_must_contain: ["unsubscribed"]

@@ -9,6 +9,7 @@ from typing import Any, Literal
 from pydantic import BaseModel, Field, model_validator
 
 from leadagent.models import (
+    APIModel,
     Booking,
     ConsentStatus,
     Lead,
@@ -95,46 +96,52 @@ class ClockIn(BaseModel):
     now: datetime | None = Field(
         default=None, description="Simulated 'now' (ISO 8601 with offset). Null restores real time."
     )
+    preset: Literal["business_hours", "after_hours", "real"] | None = Field(
+        default=None,
+        description="Shortcut resolved in the company's timezone: 10:00 or 22:30 on the next "
+        "weekday, or real time. Overrides `now`.",
+    )
+    company: str | None = Field(default=None, description="Company whose timezone a preset uses.")
 
 
-class ClockOut(BaseModel):
+class ClockOut(APIModel):
     now: datetime
     simulated: bool
 
 
 # ------------------------------------------------------------------ responses
-class Accepted(BaseModel):
+class Accepted(APIModel):
     lead_id: str
     created_at: datetime
     status: Literal["processing"] = "processing"
 
 
-class OfficeBrief(BaseModel):
+class OfficeBrief(APIModel):
     id: str
     name: str
     reps: int
 
 
-class QualificationFieldView(BaseModel):
+class QualificationFieldView(APIModel):
     key: str
     question: str
     type: str
     options: list[str] = Field(default_factory=list)
 
 
-class CompanyBrief(BaseModel):
+class CompanyBrief(APIModel):
     slug: str
     name: str
     brand_color: str
     logo_url: str
 
 
-class CompanyList(BaseModel):
+class CompanyList(APIModel):
     default: str
     companies: list[CompanyBrief]
 
 
-class CompanyPublicConfig(BaseModel):
+class CompanyPublicConfig(APIModel):
     """Everything the UI needs to brand itself. Loaded at runtime, never hardcoded."""
 
     slug: str
@@ -146,6 +153,7 @@ class CompanyPublicConfig(BaseModel):
     tone: str
     reply_signature: str
     hot_lead_threshold: int
+    warm_lead_threshold: int
     appointment_kind: str
     appointment_minutes: int
     fields: list[QualificationFieldView]
@@ -154,7 +162,7 @@ class CompanyPublicConfig(BaseModel):
     crm_pipeline: str
 
 
-class LeadSummary(BaseModel):
+class LeadSummary(APIModel):
     id: str
     company: str
     name: str | None
@@ -170,7 +178,7 @@ class LeadSummary(BaseModel):
     escalated: bool
 
 
-class RoutingView(BaseModel):
+class RoutingView(APIModel):
     office_id: str | None
     office_name: str | None
     rep_id: str | None
@@ -178,7 +186,7 @@ class RoutingView(BaseModel):
     reason: str | None
 
 
-class CRMPreview(BaseModel):
+class CRMPreview(APIModel):
     contact_id: str | None
     pipeline: str
     stage: str | None
@@ -186,12 +194,12 @@ class CRMPreview(BaseModel):
     properties: dict[str, Any]
 
 
-class DeferredView(BaseModel):
+class DeferredView(APIModel):
     body: str
     deliver_after: datetime
 
 
-class LeadDetail(BaseModel):
+class LeadDetail(APIModel):
     summary: LeadSummary
     lead: Lead
     messages: list[Message]
@@ -208,11 +216,11 @@ class LeadDetail(BaseModel):
     deferred: list[DeferredView]
 
 
-class LeadList(BaseModel):
+class LeadList(APIModel):
     leads: list[LeadSummary]
 
 
-class StreamEvent(BaseModel):
+class StreamEvent(APIModel):
     """One server-sent event. `id` is the replay cursor (Last-Event-ID)."""
 
     id: int
@@ -223,13 +231,27 @@ class StreamEvent(BaseModel):
     data: dict[str, Any]
 
 
-class EventHistory(BaseModel):
+class EventHistory(APIModel):
     events: list[StreamEvent]
 
 
-class Health(BaseModel):
+class Health(APIModel):
     ok: bool
     llm: Literal["ready", "missing_api_key"]
     model: str
     adapters: dict[str, str]
     simulated_clock: bool
+
+
+class ScenarioBrief(APIModel):
+    id: str
+    title: str
+    description: str
+    company: str
+    source: LeadSource
+    followups: int
+    clock: datetime | None
+
+
+class ScenarioList(APIModel):
+    scenarios: list[ScenarioBrief]

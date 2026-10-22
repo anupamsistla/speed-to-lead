@@ -1,0 +1,17 @@
+id: out_of_area
+title: Out of service area
+description: A lead in New York. Expect a polite close and a CRM log, with no booking and no rep ping.
+company: sunrise_solar
+clock: "2026-10-27T10:00:00-06:00"
+lead:
+  name: Priya Shah
+  phone: "+12125550188"
+  source: web_form
+  message: Hello, I'd like solar panels for my house in zip 10001. I own it and the bill is $300 a month.
+expect:
+  qualified: false
+  booked: false
+  closed_reason: out_of_area
+  reply_sent: true
+  crm_written: true
+  rep_notified: false

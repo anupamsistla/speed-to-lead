@@ -1,0 +1,2606 @@
+{
+  "components": {
+    "schemas": {
+      "Accepted": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "lead_id": {
+            "title": "Lead Id",
+            "type": "string"
+          },
+          "status": {
+            "const": "processing",
+            "default": "processing",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "lead_id",
+          "created_at",
+          "status"
+        ],
+        "title": "Accepted",
+        "type": "object"
+      },
+      "Booking": {
+        "properties": {
+          "end": {
+            "format": "date-time",
+            "title": "End",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "lead_id": {
+            "title": "Lead Id",
+            "type": "string"
+          },
+          "office_id": {
+            "title": "Office Id",
+            "type": "string"
+          },
+          "office_name": {
+            "title": "Office Name",
+            "type": "string"
+          },
+          "rep_id": {
+            "title": "Rep Id",
+            "type": "string"
+          },
+          "rep_name": {
+            "title": "Rep Name",
+            "type": "string"
+          },
+          "start": {
+            "format": "date-time",
+            "title": "Start",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "lead_id",
+          "rep_id",
+          "rep_name",
+          "office_id",
+          "office_name",
+          "start",
+          "end",
+          "label",
+          "kind"
+        ],
+        "title": "Booking",
+        "type": "object"
+      },
+      "CRMPreview": {
+        "properties": {
+          "contact_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contact Id"
+          },
+          "pipeline": {
+            "title": "Pipeline",
+            "type": "string"
+          },
+          "properties": {
+            "additionalProperties": true,
+            "title": "Properties",
+            "type": "object"
+          },
+          "stage": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stage"
+          },
+          "synced": {
+            "title": "Synced",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "contact_id",
+          "pipeline",
+          "stage",
+          "synced",
+          "properties"
+        ],
+        "title": "CRMPreview",
+        "type": "object"
+      },
+      "ClockIn": {
+        "properties": {
+          "company": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Company whose timezone a preset uses.",
+            "title": "Company"
+          },
+          "now": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Simulated 'now' (ISO 8601 with offset). Null restores real time.",
+            "title": "Now"
+          },
+          "preset": {
+            "anyOf": [
+              {
+                "enum": [
+                  "business_hours",
+                  "after_hours",
+                  "real"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Shortcut resolved in the company's timezone: 10:00 or 22:30 on the next weekday, or real time. Overrides `now`.",
+            "title": "Preset"
+          }
+        },
+        "title": "ClockIn",
+        "type": "object"
+      },
+      "ClockOut": {
+        "properties": {
+          "now": {
+            "format": "date-time",
+            "title": "Now",
+            "type": "string"
+          },
+          "simulated": {
+            "title": "Simulated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "now",
+          "simulated"
+        ],
+        "title": "ClockOut",
+        "type": "object"
+      },
+      "CompanyBrief": {
+        "properties": {
+          "brand_color": {
+            "title": "Brand Color",
+            "type": "string"
+          },
+          "logo_url": {
+            "title": "Logo Url",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          }
+        },
+        "required": [
+          "slug",
+          "name",
+          "brand_color",
+          "logo_url"
+        ],
+        "title": "CompanyBrief",
+        "type": "object"
+      },
+      "CompanyList": {
+        "properties": {
+          "companies": {
+            "items": {
+              "$ref": "#/components/schemas/CompanyBrief"
+            },
+            "title": "Companies",
+            "type": "array"
+          },
+          "default": {
+            "title": "Default",
+            "type": "string"
+          }
+        },
+        "required": [
+          "default",
+          "companies"
+        ],
+        "title": "CompanyList",
+        "type": "object"
+      },
+      "CompanyPublicConfig": {
+        "description": "Everything the UI needs to brand itself. Loaded at runtime, never hardcoded.",
+        "properties": {
+          "appointment_kind": {
+            "title": "Appointment Kind",
+            "type": "string"
+          },
+          "appointment_minutes": {
+            "title": "Appointment Minutes",
+            "type": "integer"
+          },
+          "brand_color": {
+            "title": "Brand Color",
+            "type": "string"
+          },
+          "crm_pipeline": {
+            "title": "Crm Pipeline",
+            "type": "string"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "fields": {
+            "items": {
+              "$ref": "#/components/schemas/QualificationFieldView"
+            },
+            "title": "Fields",
+            "type": "array"
+          },
+          "hot_lead_threshold": {
+            "title": "Hot Lead Threshold",
+            "type": "integer"
+          },
+          "logo_url": {
+            "title": "Logo Url",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "offices": {
+            "items": {
+              "$ref": "#/components/schemas/OfficeBrief"
+            },
+            "title": "Offices",
+            "type": "array"
+          },
+          "reply_signature": {
+            "title": "Reply Signature",
+            "type": "string"
+          },
+          "slack_channel": {
+            "title": "Slack Channel",
+            "type": "string"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          },
+          "timezone": {
+            "title": "Timezone",
+            "type": "string"
+          },
+          "tone": {
+            "title": "Tone",
+            "type": "string"
+          },
+          "warm_lead_threshold": {
+            "title": "Warm Lead Threshold",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "slug",
+          "name",
+          "description",
+          "brand_color",
+          "logo_url",
+          "timezone",
+          "tone",
+          "reply_signature",
+          "hot_lead_threshold",
+          "warm_lead_threshold",
+          "appointment_kind",
+          "appointment_minutes",
+          "fields",
+          "offices",
+          "slack_channel",
+          "crm_pipeline"
+        ],
+        "title": "CompanyPublicConfig",
+        "type": "object"
+      },
+      "DeferredView": {
+        "properties": {
+          "body": {
+            "title": "Body",
+            "type": "string"
+          },
+          "deliver_after": {
+            "format": "date-time",
+            "title": "Deliver After",
+            "type": "string"
+          }
+        },
+        "required": [
+          "body",
+          "deliver_after"
+        ],
+        "title": "DeferredView",
+        "type": "object"
+      },
+      "EventHistory": {
+        "properties": {
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/StreamEvent"
+            },
+            "title": "Events",
+            "type": "array"
+          }
+        },
+        "required": [
+          "events"
+        ],
+        "title": "EventHistory",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "Health": {
+        "properties": {
+          "adapters": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Adapters",
+            "type": "object"
+          },
+          "llm": {
+            "enum": [
+              "ready",
+              "missing_api_key"
+            ],
+            "title": "Llm",
+            "type": "string"
+          },
+          "model": {
+            "title": "Model",
+            "type": "string"
+          },
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "simulated_clock": {
+            "title": "Simulated Clock",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "ok",
+          "llm",
+          "model",
+          "adapters",
+          "simulated_clock"
+        ],
+        "title": "Health",
+        "type": "object"
+      },
+      "HumanMessageIn": {
+        "properties": {
+          "text": {
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "title": "HumanMessageIn",
+        "type": "object"
+      },
+      "InboundMessageIn": {
+        "properties": {
+          "text": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "title": "InboundMessageIn",
+        "type": "object"
+      },
+      "Lead": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "source": {
+            "default": "web_form",
+            "enum": [
+              "web_form",
+              "missed_call",
+              "text"
+            ],
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "phone",
+          "email",
+          "source",
+          "message",
+          "created_at"
+        ],
+        "title": "Lead",
+        "type": "object"
+      },
+      "LeadDetail": {
+        "properties": {
+          "answers": {
+            "additionalProperties": true,
+            "title": "Answers",
+            "type": "object"
+          },
+          "booking": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Booking"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "crm": {
+            "$ref": "#/components/schemas/CRMPreview"
+          },
+          "deferred": {
+            "items": {
+              "$ref": "#/components/schemas/DeferredView"
+            },
+            "title": "Deferred",
+            "type": "array"
+          },
+          "events": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Events",
+            "type": "array"
+          },
+          "flags": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Flags",
+            "type": "array"
+          },
+          "lead": {
+            "$ref": "#/components/schemas/Lead"
+          },
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/Message"
+            },
+            "title": "Messages",
+            "type": "array"
+          },
+          "missing_fields": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Missing Fields",
+            "type": "array"
+          },
+          "notifications": {
+            "items": {
+              "$ref": "#/components/schemas/Notification"
+            },
+            "title": "Notifications",
+            "type": "array"
+          },
+          "routing": {
+            "$ref": "#/components/schemas/RoutingView"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Score"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "summary": {
+            "$ref": "#/components/schemas/LeadSummary"
+          },
+          "tool_calls": {
+            "items": {
+              "$ref": "#/components/schemas/ToolCall"
+            },
+            "title": "Tool Calls",
+            "type": "array"
+          }
+        },
+        "required": [
+          "summary",
+          "lead",
+          "messages",
+          "answers",
+          "missing_fields",
+          "score",
+          "routing",
+          "booking",
+          "crm",
+          "notifications",
+          "tool_calls",
+          "flags",
+          "events",
+          "deferred"
+        ],
+        "title": "LeadDetail",
+        "type": "object"
+      },
+      "LeadIn": {
+        "description": "A lead from a web form, missed call or inbound text.",
+        "properties": {
+          "company": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Company slug. Defaults to the active one.",
+            "title": "Company"
+          },
+          "consent": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Explicit SMS consent captured by the form, if any.",
+            "title": "Consent"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "source": {
+            "default": "web_form",
+            "enum": [
+              "web_form",
+              "missed_call",
+              "text"
+            ],
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "title": "LeadIn",
+        "type": "object"
+      },
+      "LeadList": {
+        "properties": {
+          "leads": {
+            "items": {
+              "$ref": "#/components/schemas/LeadSummary"
+            },
+            "title": "Leads",
+            "type": "array"
+          }
+        },
+        "required": [
+          "leads"
+        ],
+        "title": "LeadList",
+        "type": "object"
+      },
+      "LeadSummary": {
+        "properties": {
+          "booked": {
+            "title": "Booked",
+            "type": "boolean"
+          },
+          "company": {
+            "title": "Company",
+            "type": "string"
+          },
+          "consent": {
+            "enum": [
+              "unknown",
+              "opted_in",
+              "opted_out"
+            ],
+            "title": "Consent",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "escalated": {
+            "title": "Escalated",
+            "type": "boolean"
+          },
+          "first_response_seconds": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "First Response Seconds"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
+          },
+          "source": {
+            "enum": [
+              "web_form",
+              "missed_call",
+              "text"
+            ],
+            "title": "Source",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "new",
+              "in_progress",
+              "booked",
+              "escalated",
+              "closed",
+              "spam",
+              "opted_out",
+              "human"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "tier": {
+            "anyOf": [
+              {
+                "enum": [
+                  "hot",
+                  "warm",
+                  "cold",
+                  "disqualified"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tier"
+          }
+        },
+        "required": [
+          "id",
+          "company",
+          "name",
+          "phone",
+          "source",
+          "created_at",
+          "status",
+          "score",
+          "tier",
+          "first_response_seconds",
+          "consent",
+          "booked",
+          "escalated"
+        ],
+        "title": "LeadSummary",
+        "type": "object"
+      },
+      "Message": {
+        "properties": {
+          "body": {
+            "title": "Body",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "direction": {
+            "enum": [
+              "inbound",
+              "outbound"
+            ],
+            "title": "Direction",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "lead_id": {
+            "title": "Lead Id",
+            "type": "string"
+          },
+          "sender": {
+            "default": "agent",
+            "enum": [
+              "lead",
+              "agent",
+              "human"
+            ],
+            "title": "Sender",
+            "type": "string"
+          },
+          "sent": {
+            "default": true,
+            "title": "Sent",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "lead_id",
+          "direction",
+          "body",
+          "created_at",
+          "sent",
+          "sender"
+        ],
+        "title": "Message",
+        "type": "object"
+      },
+      "MissedCallWebhook": {
+        "properties": {
+          "from": {
+            "title": "From",
+            "type": "string"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          }
+        },
+        "required": [
+          "from"
+        ],
+        "title": "MissedCallWebhook",
+        "type": "object"
+      },
+      "Notification": {
+        "properties": {
+          "channel": {
+            "title": "Channel",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "fields": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Fields",
+            "type": "object"
+          },
+          "kind": {
+            "enum": [
+              "new_lead",
+              "hot_lead",
+              "booked",
+              "escalation"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "lead_id": {
+            "title": "Lead Id",
+            "type": "string"
+          },
+          "mention": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mention"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "priority": {
+            "default": "normal",
+            "enum": [
+              "normal",
+              "urgent"
+            ],
+            "title": "Priority",
+            "type": "string"
+          },
+          "rep_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rep Id"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "channel",
+          "title",
+          "fields",
+          "note",
+          "mention",
+          "priority",
+          "lead_id",
+          "rep_id",
+          "created_at"
+        ],
+        "title": "Notification",
+        "type": "object"
+      },
+      "OfficeBrief": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "reps": {
+            "title": "Reps",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "reps"
+        ],
+        "title": "OfficeBrief",
+        "type": "object"
+      },
+      "QualificationFieldView": {
+        "properties": {
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "options": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Options",
+            "type": "array"
+          },
+          "question": {
+            "title": "Question",
+            "type": "string"
+          },
+          "type": {
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "question",
+          "type",
+          "options"
+        ],
+        "title": "QualificationFieldView",
+        "type": "object"
+      },
+      "RoutingView": {
+        "properties": {
+          "office_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Office Id"
+          },
+          "office_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Office Name"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "rep_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rep Id"
+          },
+          "rep_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rep Name"
+          }
+        },
+        "required": [
+          "office_id",
+          "office_name",
+          "rep_id",
+          "rep_name",
+          "reason"
+        ],
+        "title": "RoutingView",
+        "type": "object"
+      },
+      "ScenarioBrief": {
+        "properties": {
+          "clock": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Clock"
+          },
+          "company": {
+            "title": "Company",
+            "type": "string"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "followups": {
+            "title": "Followups",
+            "type": "integer"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "source": {
+            "enum": [
+              "web_form",
+              "missed_call",
+              "text"
+            ],
+            "title": "Source",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "description",
+          "company",
+          "source",
+          "followups",
+          "clock"
+        ],
+        "title": "ScenarioBrief",
+        "type": "object"
+      },
+      "ScenarioList": {
+        "properties": {
+          "scenarios": {
+            "items": {
+              "$ref": "#/components/schemas/ScenarioBrief"
+            },
+            "title": "Scenarios",
+            "type": "array"
+          }
+        },
+        "required": [
+          "scenarios"
+        ],
+        "title": "ScenarioList",
+        "type": "object"
+      },
+      "Score": {
+        "properties": {
+          "breakdown": {
+            "items": {
+              "$ref": "#/components/schemas/ScoreItem"
+            },
+            "title": "Breakdown",
+            "type": "array"
+          },
+          "close_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Close Message"
+          },
+          "complete": {
+            "default": true,
+            "title": "Complete",
+            "type": "boolean"
+          },
+          "disqualified_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Disqualified By"
+          },
+          "disqualified_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Disqualified Reason"
+          },
+          "missing_fields": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Missing Fields",
+            "type": "array"
+          },
+          "score": {
+            "title": "Score",
+            "type": "integer"
+          },
+          "tier": {
+            "enum": [
+              "hot",
+              "warm",
+              "cold",
+              "disqualified"
+            ],
+            "title": "Tier",
+            "type": "string"
+          }
+        },
+        "required": [
+          "score",
+          "tier",
+          "breakdown",
+          "complete",
+          "missing_fields",
+          "disqualified_reason",
+          "disqualified_by",
+          "close_message"
+        ],
+        "title": "Score",
+        "type": "object"
+      },
+      "ScoreItem": {
+        "properties": {
+          "points": {
+            "title": "Points",
+            "type": "integer"
+          },
+          "rule": {
+            "title": "Rule",
+            "type": "string"
+          }
+        },
+        "required": [
+          "rule",
+          "points"
+        ],
+        "title": "ScoreItem",
+        "type": "object"
+      },
+      "SmsWebhook": {
+        "properties": {
+          "body": {
+            "title": "Body",
+            "type": "string"
+          },
+          "from": {
+            "title": "From",
+            "type": "string"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          }
+        },
+        "required": [
+          "from",
+          "body"
+        ],
+        "title": "SmsWebhook",
+        "type": "object"
+      },
+      "StreamEvent": {
+        "description": "One server-sent event. `id` is the replay cursor (Last-Event-ID).",
+        "properties": {
+          "at": {
+            "format": "date-time",
+            "title": "At",
+            "type": "string"
+          },
+          "company": {
+            "title": "Company",
+            "type": "string"
+          },
+          "data": {
+            "additionalProperties": true,
+            "title": "Data",
+            "type": "object"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "lead_id": {
+            "title": "Lead Id",
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "lead_created",
+              "message",
+              "deferred",
+              "tool_call",
+              "state",
+              "notification",
+              "first_response",
+              "turn_done",
+              "error"
+            ],
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "lead_id",
+          "company",
+          "at",
+          "data"
+        ],
+        "title": "StreamEvent",
+        "type": "object"
+      },
+      "ToolCall": {
+        "properties": {
+          "args": {
+            "additionalProperties": true,
+            "title": "Args",
+            "type": "object"
+          },
+          "error": {
+            "default": false,
+            "title": "Error",
+            "type": "boolean"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "latency_ms": {
+            "title": "Latency Ms",
+            "type": "number"
+          },
+          "lead_id": {
+            "title": "Lead Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "result": {
+            "additionalProperties": true,
+            "title": "Result",
+            "type": "object"
+          },
+          "started_at": {
+            "format": "date-time",
+            "title": "Started At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "lead_id",
+          "name",
+          "args",
+          "result",
+          "latency_ms",
+          "started_at",
+          "error"
+        ],
+        "title": "ToolCall",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      },
+      "WebFormWebhook": {
+        "properties": {
+          "consent": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Consent"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "message": {
+            "default": "",
+            "title": "Message",
+            "type": "string"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          }
+        },
+        "title": "WebFormWebhook",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "Intake, agent state and live event streams for the demo UI.",
+    "title": "Speed-to-Lead Agent",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/clock": {
+      "get": {
+        "operationId": "get_clock_api_clock_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClockOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Get Clock",
+        "tags": [
+          "system"
+        ]
+      },
+      "put": {
+        "description": "Pretend it is a different time (for example 11pm to demo quiet hours).",
+        "operationId": "set_clock_api_clock_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClockIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClockOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Set Clock",
+        "tags": [
+          "system"
+        ]
+      }
+    },
+    "/api/companies": {
+      "get": {
+        "operationId": "companies_api_companies_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyList"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Companies",
+        "tags": [
+          "companies"
+        ]
+      }
+    },
+    "/api/companies/{slug}/config": {
+      "get": {
+        "operationId": "company_config_api_companies__slug__config_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "title": "Slug",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyPublicConfig"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Company Config",
+        "tags": [
+          "companies"
+        ]
+      }
+    },
+    "/api/companies/{slug}/logo": {
+      "get": {
+        "operationId": "company_logo_api_companies__slug__logo_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "title": "Slug",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Company Logo",
+        "tags": [
+          "companies"
+        ]
+      }
+    },
+    "/api/events": {
+      "get": {
+        "description": "Server-sent events for every lead of a company.",
+        "operationId": "company_events_api_events_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "company",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Company"
+            }
+          },
+          {
+            "in": "query",
+            "name": "follow",
+            "required": false,
+            "schema": {
+              "default": true,
+              "title": "Follow",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "after",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "title": "After",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "last-event-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Last-Event-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Company Events",
+        "tags": [
+          "events"
+        ]
+      }
+    },
+    "/api/health": {
+      "get": {
+        "operationId": "health_api_health_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Health",
+        "tags": [
+          "system"
+        ]
+      }
+    },
+    "/api/intake/missed-call": {
+      "post": {
+        "description": "Webhook for a missed call. The agent texts the caller back.",
+        "operationId": "intake_missed_call_api_intake_missed_call_post",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "company",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Company"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-webhook-secret",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Webhook-Secret"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MissedCallWebhook"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Accepted"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Intake Missed Call",
+        "tags": [
+          "intake"
+        ]
+      }
+    },
+    "/api/intake/sms": {
+      "post": {
+        "description": "Inbound text. Continues the lead's conversation if the number is known.",
+        "operationId": "intake_sms_api_intake_sms_post",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "company",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Company"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-webhook-secret",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Webhook-Secret"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SmsWebhook"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Accepted"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Intake Sms",
+        "tags": [
+          "intake"
+        ]
+      }
+    },
+    "/api/intake/web-form": {
+      "post": {
+        "description": "Webhook for a website form. Protect with the X-Webhook-Secret header.",
+        "operationId": "intake_web_form_api_intake_web_form_post",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "company",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Company"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-webhook-secret",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Webhook-Secret"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebFormWebhook"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Accepted"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Intake Web Form",
+        "tags": [
+          "intake"
+        ]
+      }
+    },
+    "/api/leads": {
+      "get": {
+        "operationId": "list_leads_api_leads_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "company",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Company"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 200,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeadList"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Leads",
+        "tags": [
+          "leads"
+        ]
+      },
+      "post": {
+        "description": "Submit a lead. Returns immediately; the agent replies in the background.",
+        "operationId": "create_lead_api_leads_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LeadIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Accepted"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Lead",
+        "tags": [
+          "leads"
+        ]
+      }
+    },
+    "/api/leads/{lead_id}": {
+      "get": {
+        "operationId": "lead_detail_api_leads__lead_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "lead_id",
+            "required": true,
+            "schema": {
+              "title": "Lead Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeadDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Lead Detail",
+        "tags": [
+          "leads"
+        ]
+      }
+    },
+    "/api/leads/{lead_id}/events": {
+      "get": {
+        "description": "Server-sent events for one lead. Replays from `after` (or Last-Event-ID), then\nfollows live. Each event's data is a StreamEvent.",
+        "operationId": "lead_events_api_leads__lead_id__events_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "lead_id",
+            "required": true,
+            "schema": {
+              "title": "Lead Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "follow",
+            "required": false,
+            "schema": {
+              "default": true,
+              "title": "Follow",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "after",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "title": "After",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "last-event-id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Last-Event-Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              },
+              "text/event-stream": {}
+            },
+            "description": "StreamEvent items"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Lead Events",
+        "tags": [
+          "events"
+        ]
+      }
+    },
+    "/api/leads/{lead_id}/events/history": {
+      "get": {
+        "operationId": "lead_event_history_api_leads__lead_id__events_history_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "lead_id",
+            "required": true,
+            "schema": {
+              "title": "Lead Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "after",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "title": "After",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventHistory"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Lead Event History",
+        "tags": [
+          "events"
+        ]
+      }
+    },
+    "/api/leads/{lead_id}/human-message": {
+      "post": {
+        "description": "A person replies to the lead from the rep view (also takes over).",
+        "operationId": "human_message_api_leads__lead_id__human_message_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "lead_id",
+            "required": true,
+            "schema": {
+              "title": "Lead Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HumanMessageIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Message"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Human Message",
+        "tags": [
+          "leads"
+        ]
+      }
+    },
+    "/api/leads/{lead_id}/messages": {
+      "post": {
+        "description": "A reply from the lead (simulated inbound SMS).",
+        "operationId": "lead_reply_api_leads__lead_id__messages_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "lead_id",
+            "required": true,
+            "schema": {
+              "title": "Lead Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InboundMessageIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Accepted"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Lead Reply",
+        "tags": [
+          "leads"
+        ]
+      }
+    },
+    "/api/leads/{lead_id}/takeover": {
+      "post": {
+        "description": "A human takes over. The agent stops replying to this lead.",
+        "operationId": "takeover_api_leads__lead_id__takeover_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "lead_id",
+            "required": true,
+            "schema": {
+              "title": "Lead Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeadSummary"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Takeover",
+        "tags": [
+          "leads"
+        ]
+      }
+    },
+    "/api/scenarios": {
+      "get": {
+        "description": "Saved scenarios from evals/scenarios, for repeatable demos.",
+        "operationId": "scenarios_api_scenarios_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "company",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Company"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScenarioList"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Scenarios",
+        "tags": [
+          "scenarios"
+        ]
+      }
+    },
+    "/api/scenarios/{scenario_id}/replay": {
+      "post": {
+        "description": "Play a saved scenario through: set the clock, seed the CRM, submit the lead, then\nsend each follow-up after the agent has replied.",
+        "operationId": "replay_scenario_api_scenarios__scenario_id__replay_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "scenario_id",
+            "required": true,
+            "schema": {
+              "title": "Scenario Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pause",
+            "required": false,
+            "schema": {
+              "default": 1.5,
+              "maximum": 10,
+              "minimum": 0,
+              "title": "Pause",
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Accepted"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Replay Scenario",
+        "tags": [
+          "scenarios"
+        ]
+      }
+    }
+  }
+}

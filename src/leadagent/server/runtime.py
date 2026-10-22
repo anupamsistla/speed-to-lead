@@ -22,8 +22,10 @@ from leadagent.agent import LeadAgent
 from leadagent.clock import Clock
 from leadagent.config import load_company
 from leadagent.config.schemas import CompanyBundle
+from leadagent.crm_mapping import to_crm_properties
 from leadagent.llm import LLM
 from leadagent.models import Lead, Message, Notification, ToolCall
+from leadagent.scenarios import Scenario
 from leadagent.server import views
 from leadagent.server.events import EventBus
 from leadagent.server.schemas import LeadDetail, LeadIn, LeadSummary
@@ -293,6 +295,29 @@ class CompanyRuntime:
             session.messages.append(msg)
             self._sync(session)
         return msg
+
+    def seed_contacts(self, scenario: Scenario) -> None:
+        """Put the scenario's pre-existing CRM contacts in place (mock CRM only)."""
+        crm = self.adapters.crm
+        if not hasattr(crm, "seed_contact"):
+            return
+        mapping = self.bundle.crm_mapping
+        for c in scenario.seed_contacts:
+            crm.seed_contact(
+                name=c.name,
+                phone=c.phone,
+                email=c.email,
+                properties=to_crm_properties(mapping, c.fields),
+                pipeline=mapping.pipeline,
+                stage=c.stage or mapping.stage_on_create,
+            )
+
+    def play_followups(self, lead_id: str, followups: list[str], pause: float) -> None:
+        """Run the first turn, then each follow-up message in order, like a real conversation."""
+        self.run_first_turn(lead_id)
+        for text in followups:
+            time.sleep(pause)
+            self.run_inbound(lead_id, text)
 
     def flush(self) -> int:
         """Deliver messages held back for quiet hours once they are allowed to go out."""

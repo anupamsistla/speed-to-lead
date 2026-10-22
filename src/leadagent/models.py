@@ -6,14 +6,22 @@ import re
 from datetime import datetime
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
+
+
+class APIModel(BaseModel):
+    """Base for models that appear in API responses: defaulted fields are always sent, so the
+    generated client types mark them required."""
+
+    model_config = ConfigDict(json_schema_serialization_defaults_required=True)
+
 
 LeadSource = Literal["web_form", "missed_call", "text"]
 ConsentStatus = Literal["unknown", "opted_in", "opted_out"]
 Tier = Literal["hot", "warm", "cold", "disqualified"]
 
 
-class Lead(BaseModel):
+class Lead(APIModel):
     id: str
     name: str | None = None
     phone: str | None = None
@@ -23,7 +31,7 @@ class Lead(BaseModel):
     created_at: datetime
 
 
-class Message(BaseModel):
+class Message(APIModel):
     id: str
     lead_id: str
     direction: Literal["inbound", "outbound"]
@@ -33,7 +41,7 @@ class Message(BaseModel):
     sender: Literal["lead", "agent", "human"] = "agent"
 
 
-class ToolCall(BaseModel):
+class ToolCall(APIModel):
     id: str
     lead_id: str
     name: str
@@ -44,12 +52,12 @@ class ToolCall(BaseModel):
     error: bool = False
 
 
-class ScoreItem(BaseModel):
+class ScoreItem(APIModel):
     rule: str
     points: int
 
 
-class Score(BaseModel):
+class Score(APIModel):
     score: int
     tier: Tier
     breakdown: list[ScoreItem] = Field(default_factory=list)
@@ -60,7 +68,7 @@ class Score(BaseModel):
     close_message: str | None = None
 
 
-class Slot(BaseModel):
+class Slot(APIModel):
     slot_id: str
     rep_id: str
     start: datetime
@@ -68,7 +76,7 @@ class Slot(BaseModel):
     label: str
 
 
-class Booking(BaseModel):
+class Booking(APIModel):
     id: str
     lead_id: str
     rep_id: str
@@ -81,7 +89,7 @@ class Booking(BaseModel):
     kind: str
 
 
-class CRMContact(BaseModel):
+class CRMContact(APIModel):
     id: str
     name: str | None = None
     phone: str | None = None
@@ -91,7 +99,7 @@ class CRMContact(BaseModel):
     stage: str | None = None
 
 
-class Notification(BaseModel):
+class Notification(APIModel):
     kind: Literal["new_lead", "hot_lead", "booked", "escalation"]
     channel: str
     title: str

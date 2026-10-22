@@ -19,46 +19,11 @@ from leadagent.server import Settings, create_app
 from leadagent.server.events import EventBus
 from leadagent.server.logging_setup import JsonFormatter
 from leadagent.server.store import Store
-from tests.conftest import BUSINESS_TIME, HOT_FIELDS, NIGHT_TIME
+from tests.conftest import BUSINESS_TIME, FORM, HOT_FIELDS, NIGHT_TIME
 from tests.test_agent import book_first_slot, offer_slots
 
 DEN = ZoneInfo("America/Denver")
 
-
-@pytest.fixture
-def make_app(tmp_path):
-    """Factory returning (client, llm, app). The database file survives across calls."""
-    clients: list[TestClient] = []
-
-    def _make(steps=None, *, clock=None, secret=None, db=None, llm=None):
-        llm = llm or ScriptedLLM(steps)
-        settings = Settings(
-            database_path=str(db or tmp_path / "t.db"),
-            webhook_secret=secret,
-            adapter_env={},
-        )
-        app = create_app(
-            settings,
-            llm_factory=lambda: llm,
-            clock=clock or FixedClock(BUSINESS_TIME),
-            load_env=False,
-            flush_interval=3600,
-        )
-        client = TestClient(app)
-        client.__enter__()
-        clients.append(client)
-        return client, llm, app
-
-    yield _make
-    for c in clients:
-        c.__exit__(None, None, None)
-
-
-FORM = {
-    "name": "Jamie Rivera",
-    "phone": "+13035550142",
-    "message": "Own my home in 80205, bill is $250, asphalt roof, want it ASAP",
-}
 
 FIRST_TURN = [
     reply(
