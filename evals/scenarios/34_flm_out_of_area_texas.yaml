@@ -1,0 +1,17 @@
+id: flm_out_of_area_texas
+title: Out of lending area
+description: >-
+  Texas is outside Minnesota and Wisconsin. Polite close, logged, no booking, no loan officer ping.
+company: first_lakes_mortgage
+lead:
+  name: Luis Moreno
+  phone: "+12145550104"
+  source: web_form
+  message: Looking to buy a house in Dallas, zip 75201, around $380,000. Credit is about 720.
+expect:
+  qualified: false
+  closed_reason: out_of_area
+  booked: false
+  reply_sent: true
+  crm_written: true
+  rep_notified: false

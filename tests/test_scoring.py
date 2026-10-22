@@ -95,3 +95,20 @@ def test_session_values_include_contact_fields():
     s = LeadSession(lead=Lead(id="x", email="a@b.co", created_at=datetime.now(UTC)))
     assert s.values()["email"] == "a@b.co"
     assert HOT_FIELDS["zip"] == "80205"
+
+
+def test_choice_answers_tolerate_plus_signs_and_punctuation():
+    from leadagent.config.schemas import FieldSpec
+
+    spec = FieldSpec(
+        key="credit",
+        question="Credit?",
+        type="choice",
+        options=["under_580", "740_plus", "580_to_619"],
+    )
+    assert scoring.normalize_value(spec, "740+") == "740_plus"
+    assert scoring.normalize_value(spec, "740 plus") == "740_plus"
+    assert scoring.normalize_value(spec, "580 to 619") == "580_to_619"
+    assert scoring.normalize_value(spec, "Under 580") == "under_580"
+    with pytest.raises(scoring.FieldError):
+        scoring.normalize_value(spec, "excellent")

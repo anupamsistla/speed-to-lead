@@ -56,7 +56,7 @@ class TodoMarker:
 
 
 def companies_dir() -> Path:
-    return Path(os.environ.get("COMPANIES_DIR", REPO_ROOT / "companies"))
+    return Path(os.environ.get("COMPANIES_DIR") or REPO_ROOT / "companies")
 
 
 def list_companies(base: Path | None = None) -> list[str]:

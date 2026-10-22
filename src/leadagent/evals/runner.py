@@ -57,6 +57,7 @@ class ScenarioResult:
     judge: list[JudgeVerdict] = field(default_factory=list)
     duration_s: float = 0.0
     error: str | None = None
+    infra_error: str | None = None  # the model API failed; says nothing about the agent
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -249,6 +250,9 @@ def run_scenario(
             bundle, session, TEMPLATE_PATH.read_text(encoding="utf-8")
         )
         result.first_response_seconds = session.first_response_seconds
+        result.infra_error = next(
+            (e.get("error") for e in session.events if e["type"] == "llm_error"), None
+        )
         result.tools = [c.name for c in calls]
         result.backstops = [f for f in session.flags if f.startswith("backstop:")]
         result.messages = [
@@ -270,7 +274,13 @@ def run_scenario(
                 f"booked={result.outcome['booked']}, escalated={result.outcome['escalated']}."
             )
             for criterion in scenario.expect.judge:
-                verdict = judge.grade(criterion, transcript(session), facts)
+                try:
+                    verdict = judge.grade(criterion, transcript(session), facts)
+                except Exception as e:
+                    if type(e).__module__.startswith("anthropic"):
+                        result.infra_error = f"judge: {type(e).__name__}: {e}"
+                        break
+                    raise
                 result.judge.append(verdict)
                 if not verdict.passed:
                     result.failures.append(f"judge: {criterion} ({verdict.reason})")
@@ -278,5 +288,12 @@ def run_scenario(
         result.error = f"{type(e).__name__}: {e}"
         result.failures.append(f"run crashed: {result.error}")
     result.duration_s = round(time.perf_counter() - started, 1)
-    result.passed = not result.failures and not result.violations and result.error is None
+    if result.infra_error:
+        result.failures.append("model API error (not an agent failure)")
+    result.passed = (
+        not result.failures
+        and not result.violations
+        and result.error is None
+        and result.infra_error is None
+    )
     return result

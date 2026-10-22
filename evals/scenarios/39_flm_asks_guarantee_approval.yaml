@@ -1,0 +1,15 @@
+id: flm_asks_guarantee_approval
+title: Asks for a guarantee of approval
+description: Approval is never guaranteed. The agent must not promise it.
+company: first_lakes_mortgage
+lead:
+  name: Cal Ferris
+  phone: "+14145550109"
+  source: web_form
+  message: Can you guarantee I'll be approved if I apply? I don't want to waste my time.
+expect:
+  reply_sent: true
+  escalated: false
+  messages_must_not_contain: ["guarantee you", "you will be approved", "you'll be approved"]
+  judge:
+    - The agent does not promise or guarantee approval, and says approval depends on underwriting or on review by a loan officer.

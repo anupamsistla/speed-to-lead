@@ -264,3 +264,76 @@ def test_stubs_fail_loudly(clock):
         TwilioChannel().send(None, "x")  # type: ignore[arg-type]
     with pytest.raises(NotImplementedError):
         GoogleCalendar().is_free("r", clock.now(), 60)
+
+
+# ------------------------------------------------------------ HubSpot account setup
+def test_required_properties_come_from_the_crm_mapping(bundle):
+    from leadagent.adapters.hubspot import required_properties
+
+    props = required_properties(bundle)
+    assert set(props) == set(bundle.crm_mapping.field_map.values())
+    assert (
+        props["monthly_electric_bill"]["type"] == "number"
+        and props["lead_score"]["type"] == "number"
+    )
+    assert props["homeowner_status"] == {
+        "label": "Homeowner Status",
+        "type": "string",
+        "fieldType": "text",
+    }
+
+
+def test_ensure_properties_creates_only_what_is_missing(bundle):
+    from leadagent.adapters.hubspot import ensure_properties, required_properties
+
+    existing = {"zip", "roof_type"}
+    created: list[dict] = []
+
+    def handler(req: httpx.Request) -> httpx.Response:
+        assert req.url.path == "/crm/v3/properties/contacts"
+        if req.method == "GET":
+            return httpx.Response(200, json={"results": [{"name": n} for n in existing]})
+        created.append(json.loads(req.content))
+        return httpx.Response(201, json={})
+
+    client = httpx.Client(base_url=BASE_URL, transport=httpx.MockTransport(handler))
+    wanted = required_properties(bundle)
+    result = ensure_properties(client, wanted)
+    assert set(result["existing"]) == {"zip", "roof_type"}
+    assert {c["name"] for c in created} == set(wanted) - existing
+    assert all(c["groupName"] == "contactinformation" for c in created)
+    assert result["created"] == [c["name"] for c in created]
+
+
+def test_ensure_properties_surfaces_hubspot_errors(bundle):
+    from leadagent.adapters.hubspot import ensure_properties, required_properties
+
+    client = httpx.Client(
+        base_url=BASE_URL,
+        transport=httpx.MockTransport(lambda r: httpx.Response(403, text="missing scope")),
+    )
+    with pytest.raises(HubSpotError, match="403"):
+        ensure_properties(client, required_properties(bundle))
+
+
+def test_hubspot_properties_script(bundle, capsys, monkeypatch):
+    import importlib.util
+    from pathlib import Path
+
+    spec = importlib.util.spec_from_file_location(
+        "hs_props", Path(__file__).resolve().parents[1] / "scripts" / "hubspot_properties.py"
+    )
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    assert mod.main(["--company", bundle.slug]) == 0
+    out = capsys.readouterr().out
+    assert (
+        "monthly_electric_bill" in out
+        and "Residential Sales" in out
+        and "Consultation Booked" in out
+    )
+    monkeypatch.delenv("HUBSPOT_TOKEN", raising=False)
+    monkeypatch.setattr(mod, "load_dotenv", lambda *a, **k: None)
+    assert mod.main(["--company", bundle.slug, "--create"]) == 2
+    assert "HUBSPOT_TOKEN" in capsys.readouterr().err
+    assert mod.main(["--company", "nope"]) == 2

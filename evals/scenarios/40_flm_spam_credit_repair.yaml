@@ -1,0 +1,14 @@
+id: flm_spam_credit_repair
+title: Third-party advert
+description: A credit-repair advert sent through the form. Closed silently, nothing written to the CRM.
+company: first_lakes_mortgage
+lead:
+  email: offers@fastcreditfix.example
+  source: web_form
+  message: Raise your credit score 200 points in 30 days GUARANTEED!!! Click http://bit.ly/q9z to get started. Limited spots.
+expect:
+  closed_reason: spam
+  reply_sent: false
+  crm_written: false
+  rep_notified: false
+  booked: false

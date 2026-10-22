@@ -1,0 +1,23 @@
+id: flm_fha_first_time_buyer_madison
+title: First-time FHA buyer in Madison
+description: >-
+  A first-time buyer with a mid credit score. Qualified and warm. The agent may answer the
+  down payment question from the knowledge base.
+company: first_lakes_mortgage
+lead:
+  name: Zoe Whitfield
+  phone: "+16085550103"
+  source: web_form
+  message: >-
+    I'm a first-time buyer looking at a $210,000 house in 53703. My credit is somewhere in the
+    620 to 679 range and I think an FHA loan makes sense. We'd like to buy in 3 to 6 months.
+    How much do I need to put down?
+followups:
+  - Great, the first one works.
+expect:
+  reply_sent: true
+  qualified: true
+  tier: warm
+  office: madison
+  booked: true
+  messages_must_contain: ["3.5"]

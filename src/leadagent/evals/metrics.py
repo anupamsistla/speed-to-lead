@@ -46,4 +46,5 @@ def aggregate(results: list[ScenarioResult]) -> dict[str, Any]:
         "judge_pass_rate": _rate(judged),
         "judge_checks": len(judged),
         "crashed": sum(r.error is not None for r in results),
+        "api_errors": sum(r.infra_error is not None for r in results),
     }

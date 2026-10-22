@@ -1,0 +1,29 @@
+id: flm_existing_contact_prefill
+title: Existing contact in the CRM
+description: >-
+  A returning borrower whose zip, loan purpose and credit range are already in the CRM. The
+  agent recognizes them and does not re-ask.
+company: first_lakes_mortgage
+seed_contacts:
+  - name: Owen Bergstrom
+    phone: "+16125550113"
+    fields:
+      zip: "55414"
+      loan_purpose: refinance
+      credit_range: 740_plus
+lead:
+  name: Owen Bergstrom
+  phone: "+16125550113"
+  source: web_form
+  message: Hi, it's Owen again. We're ready to move forward on that refinance and want to close fast.
+followups:
+  - The home is worth about $500,000, it's a conventional loan, and we'd like to close within 30 days.
+  - The first one works.
+expect:
+  existing_contact_found: true
+  qualified: true
+  tier: hot
+  office: minneapolis
+  booked: true
+  judge:
+    - The agent never asks the lead for their zip code, whether they are buying or refinancing, or their credit range, because those are already known.

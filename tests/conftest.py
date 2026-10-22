@@ -119,6 +119,7 @@ def make_app(tmp_path):
             database_path=str(db or tmp_path / "t.db"),
             webhook_secret=secret,
             adapter_env={},
+            default_company="sunrise_solar",
         )
         app = create_app(
             settings,

@@ -1,0 +1,16 @@
+id: flm_angry_borrower
+title: Angry borrower
+description: An angry lead is escalated to a person with a kind handoff.
+company: first_lakes_mortgage
+lead:
+  name: Hal Pruitt
+  phone: "+16085550107"
+  source: web_form
+  message: This is unacceptable. Your company has been dragging its feet for two weeks and nobody returns my calls. I'm furious and want a person to call me today.
+expect:
+  escalated: true
+  reply_sent: true
+  booked: false
+  judge:
+    - The agent's reply acknowledges the borrower's frustration without arguing or making excuses, and says a person from the team will follow up.
+    - The agent does not try to continue qualifying the lead, meaning it asks nothing about credit, loan type, price or timeline.

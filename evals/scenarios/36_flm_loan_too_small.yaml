@@ -1,0 +1,16 @@
+id: flm_loan_too_small
+title: Below the minimum loan size
+description: A very small property value. Closed politely, not booked.
+company: first_lakes_mortgage
+lead:
+  name: Sam Whitaker
+  phone: "+14145550106"
+  source: web_form
+  message: Looking to refinance my cabin in 53204, it's worth about $60,000. My credit is around 700.
+expect:
+  qualified: false
+  closed_reason: loan_too_small
+  booked: false
+  reply_sent: true
+  crm_written: true
+  rep_notified: false

@@ -91,7 +91,7 @@ class Scenario(Strict):
 
 
 def scenarios_dir() -> Path:
-    return Path(os.environ.get("SCENARIOS_DIR", REPO_ROOT / "evals" / "scenarios"))
+    return Path(os.environ.get("SCENARIOS_DIR") or REPO_ROOT / "evals" / "scenarios")
 
 
 def load_scenarios(company: str | None = None, base: Path | None = None) -> list[Scenario]:

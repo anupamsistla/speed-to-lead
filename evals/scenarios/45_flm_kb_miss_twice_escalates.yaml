@@ -1,0 +1,16 @@
+id: flm_kb_miss_twice_escalates
+title: Two questions outside the knowledge base
+description: Reverse mortgages and commercial loans are not covered. The second miss escalates.
+company: first_lakes_mortgage
+lead:
+  name: Walt Everett
+  phone: "+16085550115"
+  source: web_form
+  message: Do you offer reverse mortgages?
+followups:
+  - And do you do commercial real estate loans for a small office building?
+expect:
+  escalated: true
+  escalation_reason: unanswered_twice
+  reply_sent: true
+  booked: false

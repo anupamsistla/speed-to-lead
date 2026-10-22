@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 import yaml
 
+from leadagent.clock import FixedClock
 from leadagent.config import ConfigError, find_todos, list_companies, load_company
 from leadagent.config.loader import companies_dir
 from leadagent.config.schemas import expand_zips
@@ -226,3 +227,44 @@ def test_boolean_fields_need_real_booleans_in_rules(copy_company):
     edit_yaml(root / "qualification.yaml", make_bool)
     with pytest.raises(ConfigError, match="Use true or false without quotes"):
         load_company("acme", base=base)
+
+
+def test_a_copied_env_example_with_empty_values_still_uses_the_defaults(monkeypatch):
+    """.env.example ships COMPANIES_DIR= and SCENARIOS_DIR= empty. Empty must mean unset."""
+    from leadagent.scenarios import load_scenarios, scenarios_dir
+
+    monkeypatch.setenv("COMPANIES_DIR", "")
+    monkeypatch.setenv("SCENARIOS_DIR", "")
+    assert SLUG in list_companies()
+    assert companies_dir().name == "companies"
+    assert scenarios_dir().name == "scenarios" and load_scenarios()
+
+
+def test_every_variable_in_env_example_is_safe_when_left_blank(monkeypatch, tmp_path):
+    from dotenv import dotenv_values
+
+    from leadagent.adapters import build_adapters
+    from leadagent.server import Settings
+
+    values = dotenv_values(Path(__file__).resolve().parents[1] / ".env.example")
+    blank = {k: (v or "") for k, v in values.items() if k != "DATABASE_PATH"}
+    assert {"ANTHROPIC_API_KEY", "COMPANIES_DIR", "WEBHOOK_SECRET", "DEFAULT_COMPANY"} <= set(blank)
+    for k, v in blank.items():
+        monkeypatch.setenv(k, v)
+    settings = Settings.from_env()
+    assert settings.webhook_secret is None and settings.default_company is None
+    assert settings.cors_origins  # falls back to the Vite dev origins
+    bundle = load_company(SLUG)
+    adapters = build_adapters(
+        bundle,
+        FixedClock(
+            __import__("datetime").datetime(
+                2026, 10, 27, 10, tzinfo=__import__("zoneinfo").ZoneInfo("America/Denver")
+            )
+        ),
+        env=blank,
+    )
+    assert (
+        type(adapters.crm).__name__ == "MockCRM"
+        and type(adapters.notifier).__name__ == "MockNotifier"
+    )

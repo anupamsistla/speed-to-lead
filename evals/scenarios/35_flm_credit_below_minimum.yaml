@@ -1,0 +1,19 @@
+id: flm_credit_below_minimum
+title: Credit below the minimum
+description: >-
+  A borrower under the minimum credit score. Closed kindly and honestly. No promises that
+  things will work out later.
+company: first_lakes_mortgage
+lead:
+  name: Terry Nolan
+  phone: "+16125550105"
+  source: web_form
+  message: Hi, I want to buy a home in 55411 for about $240,000. My credit score is around 540.
+expect:
+  qualified: false
+  closed_reason: credit_below_minimum
+  booked: false
+  reply_sent: true
+  crm_written: true
+  rep_notified: false
+  messages_must_not_contain: ["guarantee", "will be approved"]

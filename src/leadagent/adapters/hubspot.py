@@ -186,3 +186,42 @@ class HubSpotCRM:
             "PUT",
             f"/crm/v4/objects/deals/{created['id']}/associations/default/contacts/{contact_id}",
         )
+
+
+# ------------------------------------------------------------ one-time account setup
+def required_properties(bundle: Any) -> dict[str, dict[str, str]]:
+    """Contact properties the company's crm_mapping.yaml writes, with the HubSpot type to use."""
+    numeric = {f.key for f in bundle.qualification.required_fields if f.type == "number"}
+    numeric.add("lead_score")
+    out: dict[str, dict[str, str]] = {}
+    for internal, prop in bundle.crm_mapping.field_map.items():
+        kind = "number" if internal in numeric else "string"
+        label = prop.replace("_", " ").title()
+        out[prop] = {
+            "label": label,
+            "type": kind,
+            "fieldType": "number" if kind == "number" else "text",
+        }
+    return out
+
+
+def ensure_properties(
+    client: httpx.Client, wanted: dict[str, dict[str, str]]
+) -> dict[str, list[str]]:
+    """Create any missing contact properties. Returns which existed and which were created."""
+    resp = client.get("/crm/v3/properties/contacts")
+    if resp.status_code >= 400:
+        raise HubSpotError(f"could not list contact properties: {resp.status_code} {resp.text}")
+    existing = {p["name"] for p in resp.json().get("results", [])}
+    created: list[str] = []
+    for name, spec in wanted.items():
+        if name in existing:
+            continue
+        r = client.post(
+            "/crm/v3/properties/contacts",
+            json={"name": name, "groupName": "contactinformation", **spec},
+        )
+        if r.status_code >= 400:
+            raise HubSpotError(f"could not create property {name}: {r.status_code} {r.text}")
+        created.append(name)
+    return {"existing": sorted(set(wanted) & existing), "created": created}

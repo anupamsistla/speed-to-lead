@@ -48,7 +48,8 @@ def normalize_value(spec: FieldSpec, raw: Any) -> Any:
             raise FieldError(f"{spec.key}: expected a 5-digit zip, got {raw!r}")
         return m.group(1)
     if spec.type == "choice":
-        s = str(raw).strip().lower().replace(" ", "_").replace("-", "_")
+        s = str(raw).strip().lower().replace("+", "_plus").replace(" ", "_").replace("-", "_")
+        s = re.sub(r"_+", "_", s).strip("_")
         for opt in spec.options:
             if s == opt.lower():
                 return opt

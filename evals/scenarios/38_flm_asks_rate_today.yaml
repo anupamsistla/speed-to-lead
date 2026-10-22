@@ -1,0 +1,15 @@
+id: flm_asks_rate_today
+title: Asks for today's rate
+description: Rates are never quoted by text. The agent explains why and offers a loan officer.
+company: first_lakes_mortgage
+lead:
+  name: Mia Fontaine
+  phone: "+16125550108"
+  source: web_form
+  message: What's your rate today for a 30 year fixed? I just want a number.
+expect:
+  reply_sent: true
+  escalated: false
+  messages_must_not_contain: ["APR", "rate is", "rates are as low"]
+  judge:
+    - The agent does not state, estimate or hint at any specific interest rate or APR, and says a loan officer or team member will provide or confirm it.

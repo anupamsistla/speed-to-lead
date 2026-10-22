@@ -23,8 +23,8 @@ from tests.test_agent import book_first_slot, offer_slots
 
 
 # ------------------------------------------------------------------ scenario files
-def test_there_are_25_to_30_scenarios_with_the_required_hard_cases():
-    scenarios = load_scenarios()
+def test_company_one_has_25_to_30_scenarios_with_the_required_hard_cases():
+    scenarios = load_scenarios("sunrise_solar")
     assert 25 <= len(scenarios) <= 30
     ids = {s.id for s in scenarios}
     required = {
@@ -43,10 +43,16 @@ def test_there_are_25_to_30_scenarios_with_the_required_hard_cases():
     assert required <= ids, required - ids
 
 
-def test_scenario_expectations_reference_real_config(bundle):
+@pytest.mark.parametrize("slug", ["sunrise_solar", "first_lakes_mortgage"])
+def test_scenario_expectations_reference_real_config(slug):
+    from leadagent.config import load_company
+
+    bundle = load_company(slug)
     offices = {o.id for o in bundle.routing.offices}
     rules = {r.name for r in bundle.qualification.disqualify_if} | {"out_of_area", "spam"}
-    for s in load_scenarios():
+    scenarios = load_scenarios(slug)
+    assert scenarios
+    for s in scenarios:
         assert s.company == bundle.slug
         assert s.expect.office is None or s.expect.office in offices, s.id
         assert s.expect.closed_reason is None or s.expect.closed_reason in rules, s.id
@@ -61,8 +67,9 @@ def test_scenario_expectations_reference_real_config(bundle):
             assert set(field.fields) <= set(bundle.qualification.field_keys), s.id
 
 
-def test_most_assertions_are_deterministic_and_the_judge_is_the_exception():
-    scenarios = load_scenarios()
+@pytest.mark.parametrize("slug", ["sunrise_solar", "first_lakes_mortgage"])
+def test_most_assertions_are_deterministic_and_the_judge_is_the_exception(slug):
+    scenarios = load_scenarios(slug)
     judged = [s for s in scenarios if s.expect.judge]
     assert 0 < len(judged) <= len(scenarios) // 2
     assert all(len(s.expect.judge) <= 2 for s in judged)
@@ -513,3 +520,53 @@ def test_table_and_metrics_format():
         "Guardrail violations",
     ):
         assert label in metrics
+
+
+# ------------------------------------------------------------------ API outages
+def test_a_model_outage_is_an_infrastructure_error_not_an_agent_failure(bundle):
+    class Down(ScriptedLLM):
+        def create(self, **kw):
+            raise ConnectionError("credit balance is too low")
+
+    r = run_scenario(bundle, load_scenario("hot_lead_books"), Down())
+    assert not r.passed and r.infra_error and "credit balance" in r.infra_error
+    assert any("model API error" in f for f in r.failures)
+    assert aggregate([r])["api_errors"] == 1
+    assert "API ERROR" in format_table([r]) and "ERROR" in format_table([r]).split("\n")[2]
+
+
+def test_the_cli_refuses_to_report_an_invalid_run_as_a_normal_result(bundle, tmp_path, capsys):
+    class Down(ScriptedLLM):
+        def create(self, **kw):
+            raise ConnectionError("billing problem")
+
+    code = eval_main(
+        [
+            "--company",
+            bundle.slug,
+            "--only",
+            "hot_lead_books",
+            "--no-judge",
+            "--out-dir",
+            str(tmp_path),
+        ],
+        llm=Down(),
+    )
+    captured = capsys.readouterr()
+    assert code == 3
+    assert "EVAL INVALID" in captured.err and "say nothing about the agent" in captured.err
+    assert "Model API errors" in captured.out
+
+
+def test_a_judge_api_error_is_also_an_infrastructure_error(bundle):
+    import anthropic
+    import httpx
+
+    class BadJudge:
+        def grade(self, *a, **k):
+            req = httpx.Request("POST", "https://api.anthropic.com/v1/messages")
+            raise anthropic.APIConnectionError(request=req)
+
+    steps = [reply(text("hi"))]
+    r = run_scenario(bundle, load_scenario("angry_customer"), ScriptedLLM(steps), judge=BadJudge())
+    assert r.infra_error and r.infra_error.startswith("judge:")

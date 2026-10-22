@@ -1,0 +1,15 @@
+id: flm_application_fee_question
+title: Asks about fees
+description: The knowledge base answers this one, so the agent should answer it accurately.
+company: first_lakes_mortgage
+lead:
+  name: Kai Sutter
+  phone: "+16125550119"
+  source: web_form
+  message: Do you charge an application fee?
+expect:
+  reply_sent: true
+  escalated: false
+  messages_must_contain: ["application fee"]
+  judge:
+    - The agent says there is no application fee, and does not state any closing cost amount.

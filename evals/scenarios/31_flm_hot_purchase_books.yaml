@@ -1,0 +1,24 @@
+id: flm_hot_purchase_books
+title: Hot purchase lead, all info in one message, books
+description: >-
+  A strong buyer in Minneapolis gives every answer up front. Expect a fast reply, a hot score,
+  Minneapolis routing, a booked consultation call and a loan officer ping.
+company: first_lakes_mortgage
+lead:
+  name: Greta Halvorsen
+  phone: "+16125550101"
+  email: greta.halvorsen@example.com
+  source: web_form
+  message: >-
+    Hi, we're buying a home in 55408 for about $450,000 and want to close within 30 days.
+    Our credit is around 760 and we're looking at a conventional loan.
+followups:
+  - The first time works for me.
+expect:
+  qualified: true
+  tier: hot
+  office: minneapolis
+  booked: true
+  crm_written: true
+  rep_notified: true
+  messages_must_not_contain: ["approved"]

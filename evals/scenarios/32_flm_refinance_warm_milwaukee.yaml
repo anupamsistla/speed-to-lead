@@ -1,0 +1,22 @@
+id: flm_refinance_warm_milwaukee
+title: Refinance, answers over several turns, warm
+description: >-
+  Starts vague and answers piece by piece. The agent asks only what is missing, scores warm,
+  routes to Milwaukee and books.
+company: first_lakes_mortgage
+lead:
+  name: Dev Kapoor
+  phone: "+14145550102"
+  source: web_form
+  message: Hi, I'm thinking about refinancing my mortgage.
+followups:
+  - I own in Milwaukee, zip 53207, and my credit is probably in the 680 to 739 range.
+  - It would be a conventional loan. The home is worth about $320,000.
+  - I'd like to get it done in the next one to three months.
+  - The first one works for me.
+expect:
+  qualified: true
+  tier: warm
+  office: milwaukee
+  booked: true
+  crm_written: true

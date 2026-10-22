@@ -1,0 +1,14 @@
+id: flm_requests_loan_officer
+title: Asks for a loan officer
+description: The lead asks for a person. Escalate immediately.
+company: first_lakes_mortgage
+lead:
+  name: Beth Arnold
+  phone: "+16085550118"
+  source: web_form
+  message: Hi, I'd like to speak with a loan officer directly, please.
+expect:
+  escalated: true
+  escalation_reason: requested_human
+  reply_sent: true
+  booked: false

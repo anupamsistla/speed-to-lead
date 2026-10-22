@@ -1,0 +1,53 @@
+x_weekday: &weekday
+  mon: "08:00-18:00"
+  tue: "08:00-18:00"
+  wed: "08:00-18:00"
+  thu: "08:00-18:00"
+  fri: "08:00-18:00"
+
+x_weekday_sat: &weekday_sat
+  mon: "08:00-17:00"
+  tue: "08:00-17:00"
+  wed: "08:00-17:00"
+  thu: "08:00-17:00"
+  fri: "08:00-17:00"
+  sat: "09:00-12:00"
+
+offices:
+  - id: minneapolis
+    name: Minneapolis Office
+    zips: ["55401-55419"]
+    reps:
+      - {id: hannah_lindqvist, name: Hannah Lindqvist, email: hannah.lindqvist@example.com, business_hours: *weekday_sat}
+      - {id: marcus_oyelaran, name: Marcus Oyelaran, email: marcus.oyelaran@example.com, business_hours: *weekday}
+      - {id: elena_petrova, name: Elena Petrova, email: elena.petrova@example.com, business_hours: *weekday}
+  - id: milwaukee
+    name: Milwaukee Office
+    zips: ["53202-53219"]
+    reps:
+      - {id: jack_brennan, name: Jack Brennan, email: jack.brennan@example.com, business_hours: *weekday}
+      - {id: sofia_marin, name: Sofia Marin, email: sofia.marin@example.com, business_hours: *weekday_sat}
+      - {id: tariq_rahman, name: Tariq Rahman, email: tariq.rahman@example.com, business_hours: *weekday}
+  - id: madison
+    name: Madison Office
+    zips: ["53701-53719"]
+    reps:
+      - {id: olivia_grant, name: Olivia Grant, email: olivia.grant@example.com, business_hours: *weekday}
+      - {id: ben_nakamura, name: Ben Nakamura, email: ben.nakamura@example.com, business_hours: *weekday_sat}
+      - {id: priya_desai, name: Priya Desai, email: priya.desai@example.com, business_hours: *weekday}
+
+assignment: round_robin
+
+hot_lead:
+  notify: immediate
+  slack_mention: true
+  offer_earliest_slot: true
+
+appointment:
+  kind: mortgage consultation call
+  duration_minutes: 30
+  slots_to_offer: 3
+  lookahead_days: 7
+  minimum_notice_hours: 1
+
+slack_channel: "#mortgage-leads"

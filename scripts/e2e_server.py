@@ -115,7 +115,7 @@ def main() -> None:
     clock.set(business_hours_now())
     db = Path(tempfile.mkdtemp()) / "e2e.db"
     app = create_app(
-        Settings(database_path=str(db), adapter_env={}),
+        Settings(database_path=str(db), adapter_env={}, default_company="sunrise_solar"),
         llm_factory=RuleBasedLLM,
         clock=clock,
         load_env=False,

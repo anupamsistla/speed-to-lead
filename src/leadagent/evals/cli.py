@@ -93,6 +93,7 @@ def main(argv: list[str] | None = None, *, llm: LLM | None = None, judge: Any = 
         "companies": {},
     }
     failed = False
+    api_errors = 0
     started = time.time()
     for slug in slugs:
         print(f"\n=== {slug} ===", file=sys.stderr)
@@ -117,12 +118,22 @@ def main(argv: list[str] | None = None, *, llm: LLM | None = None, judge: Any = 
             print("  (LLM-judge checks are the only non-deterministic assertions.)")
         payload["companies"][slug] = {"metrics": metrics, "results": [r.to_dict() for r in results]}
         pass_rate = metrics["pass_rate"] or 0.0
+        if metrics["api_errors"]:
+            api_errors += metrics["api_errors"]
         if metrics["guardrail_violations"] > 0 or pass_rate < args.min_pass_rate:
             failed = True
 
     payload["duration_s"] = round(time.time() - started, 1)
     path = write_results(payload, args.out_dir)
     print(f"\nSaved {path}")
+    if api_errors:
+        print(
+            f"\nEVAL INVALID: the model API failed in {api_errors} run(s), for example a "
+            "billing, rate-limit or network problem. Those runs say nothing about the agent. "
+            "Fix the API problem and run again.",
+            file=sys.stderr,
+        )
+        return 3
     if failed:
         print("EVAL FAILED: a guardrail was violated or too few scenarios passed.", file=sys.stderr)
     return 1 if failed else 0

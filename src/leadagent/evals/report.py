@@ -20,6 +20,7 @@ METRIC_LABELS = [
     ("guardrail_violations", "Guardrail violations", "{}"),
     ("judge_pass_rate", "LLM-judge pass rate", "{:.0%}"),
     ("backstops_used", "Safety-net rescues (info)", "{}"),
+    ("api_errors", "Model API errors (invalid run)", "{}"),
 ]
 
 
@@ -35,6 +36,8 @@ def format_table(results: list[ScenarioResult]) -> str:
         name = f"{r.id}#{r.run + 1}" if multi else r.id
         fr = f"{r.first_response_seconds:.1f}s" if r.first_response_seconds is not None else "-"
         notes = "; ".join(r.violations + r.failures)
+        if r.infra_error:
+            notes = f"API ERROR: {r.infra_error[:90]}"
         if r.passed and r.backstops:
             notes = f"rescued: {', '.join(b.removeprefix('backstop:') for b in r.backstops)}"
         rows.append(

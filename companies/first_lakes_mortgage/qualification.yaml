@@ -1,0 +1,73 @@
+required_fields:
+  - key: zip
+    type: zip
+    question: What's the zip code of the home you're buying or refinancing?
+  - key: loan_purpose
+    type: choice
+    options: [purchase, refinance]
+    question: Are you buying a home, or refinancing one you already own?
+  - key: credit_range
+    type: choice
+    options: [under_580, 580_to_619, 620_to_679, 680_to_739, 740_plus]
+    question: Roughly where does your credit score fall (under 580, 580 to 619, 620 to 679, 680 to 739, or 740 and up)? An estimate is fine.
+  - key: loan_type
+    type: choice
+    options: [conventional, fha, va, jumbo, not_sure]
+    question: Do you know which loan type you're interested in (conventional, FHA, VA or jumbo)? Not sure is fine.
+  - key: estimated_price
+    type: number
+    question: About how much is the home worth, or the price you're looking at, in dollars?
+  - key: timeline
+    type: choice
+    options: [within_30_days, one_to_three_months, three_to_six_months, researching]
+    question: How soon are you hoping to close, or finish the refinance?
+
+disqualify_if:
+  - name: credit_below_minimum
+    when: [{field: credit_range, op: eq, value: under_580}]
+    reason: Credit score is below the minimum for the loan programs we offer.
+    close_message: >-
+      Thank you for being so open with us. We aren't able to offer a loan at that credit range
+      right now, so we don't want to waste your time. If your situation changes, we'd be glad
+      to talk again.
+  - name: loan_too_small
+    when: [{field: estimated_price, op: lt, value: 75000}]
+    reason: Home value or price is below the minimum loan size we handle.
+    close_message: >-
+      Thanks for reaching out. That's below the size of loan we're able to help with, so we
+      wouldn't be the right fit. We appreciate you thinking of us.
+
+score_weights:
+  - name: credit_740_plus
+    when: [{field: credit_range, op: eq, value: "740_plus"}]
+    points: 25
+  - name: credit_680_to_739
+    when: [{field: credit_range, op: eq, value: "680_to_739"}]
+    points: 18
+  - name: credit_620_to_679
+    when: [{field: credit_range, op: eq, value: "620_to_679"}]
+    points: 8
+  - name: closing_within_30_days
+    when: [{field: timeline, op: eq, value: within_30_days}]
+    points: 25
+  - name: closing_in_1_to_3_months
+    when: [{field: timeline, op: eq, value: one_to_three_months}]
+    points: 15
+  - name: closing_in_3_to_6_months
+    when: [{field: timeline, op: eq, value: three_to_six_months}]
+    points: 5
+  - name: purchase_loan
+    when: [{field: loan_purpose, op: eq, value: purchase}]
+    points: 15
+  - name: knows_loan_type
+    when: [{field: loan_type, op: in, value: [conventional, fha, va, jumbo]}]
+    points: 10
+  - name: price_200k_plus
+    when: [{field: estimated_price, op: gte, value: 200000}]
+    points: 15
+  - name: has_email
+    when: [{field: email, op: exists}]
+    points: 10
+
+hot_lead_threshold: 65
+warm_lead_threshold: 35

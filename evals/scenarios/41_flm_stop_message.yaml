@@ -1,0 +1,16 @@
+id: flm_stop_message
+title: Texts STOP
+description: Immediate opt-out. One unsubscribe confirmation and silence.
+company: first_lakes_mortgage
+lead:
+  name: Nora Quist
+  phone: "+16125550111"
+  source: text
+  message: STOP
+followups:
+  - Wait, what's the minimum credit score?
+expect:
+  opted_out: true
+  booked: false
+  rep_notified: false
+  messages_must_contain: ["unsubscribed"]

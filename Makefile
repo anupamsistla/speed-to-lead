@@ -3,7 +3,7 @@ PYTHON ?= /usr/local/bin/python3.12
 VENV := .venv
 BIN := $(VENV)/bin
 # Company the demo opens with. Others stay selectable from the dev header.
-COMPANY ?= $(shell ls companies | head -1)
+COMPANY ?= sunrise_solar
 
 .PHONY: setup lint test web-test gen-api eval demo
 

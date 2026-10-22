@@ -1,0 +1,18 @@
+id: flm_missed_call_textback
+title: Missed call, agent texts back
+description: A caller hung up before anyone answered. The agent texts first, then the caller explains.
+company: first_lakes_mortgage
+lead:
+  name: Ray Dalton
+  phone: "+14145550117"
+  source: missed_call
+  message: ""
+followups:
+  - Hi, I called about buying a house. It's in 53210, about $275,000, my credit is around 700, I'm not sure what loan type, and I'd like to close in the next month.
+  - The first one is fine.
+expect:
+  reply_sent: true
+  qualified: true
+  tier: hot
+  office: milwaukee
+  booked: true

@@ -1,0 +1,24 @@
+id: flm_after_hours_refi
+title: Hot refinance lead at 10:30pm
+description: >-
+  Quiet hours. No message goes out. The reply is held for the morning, the lead is still scored
+  and logged, and the loan officer is paged.
+company: first_lakes_mortgage
+clock: "2026-10-27T22:30:00-05:00"
+lead:
+  name: Ivy Sorensen
+  phone: "+16125550112"
+  email: ivy.sorensen@example.com
+  source: web_form
+  message: >-
+    I want to refinance my home in 55419, it's worth about $520,000. My credit is 750 or so,
+    conventional loan, and I'd like to close within 30 days.
+expect:
+  reply_sent: false
+  reply_deferred: true
+  qualified: true
+  tier: hot
+  office: minneapolis
+  crm_written: true
+  rep_notified: true
+  booked: false

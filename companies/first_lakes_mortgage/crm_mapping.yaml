@@ -1,0 +1,19 @@
+crm: hubspot
+pipeline: Mortgage Pipeline
+stage_on_create: New Inquiry
+stage_on_booked: Consultation Scheduled
+field_map:
+  zip: property_zip
+  loan_purpose: loan_purpose
+  credit_range: credit_band
+  loan_type: loan_program
+  estimated_price: estimated_property_value
+  timeline: closing_timeline
+  summary: inquiry_notes
+  lead_score: inquiry_score
+  score_tier: inquiry_tier
+  assigned_office: branch
+  assigned_rep: loan_officer
+  appointment_time: consultation_scheduled_for
+  consent_status: text_consent
+  source: inquiry_source

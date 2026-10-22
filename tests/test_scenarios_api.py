@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def test_saved_scenarios_are_valid_and_belong_to_a_real_company(bundle):
     scenarios = load_scenarios()
-    assert len(scenarios) >= 3
+    assert len(scenarios) >= 40
     ids = [s.id for s in scenarios]
     assert len(ids) == len(set(ids)), "scenario ids must be unique"
     for s in scenarios:
