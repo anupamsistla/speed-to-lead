@@ -1,0 +1,26 @@
+name: Sunrise Solar
+description: >-
+  Fictional residential solar and battery installer serving the Colorado Front Range
+  (Denver, Colorado Springs, Fort Collins). Free in-home consultations.
+tone: >-
+  Warm, plain-spoken and concise. Friendly neighbor, not a salesperson. Short text-message
+  sized replies. No jargon, no pressure, no exclamation overload.
+reply_signature: "Sunrise Solar Team"
+timezone: America/Denver
+business_hours:
+  mon: "08:00-18:00"
+  tue: "08:00-18:00"
+  wed: "08:00-18:00"
+  thu: "08:00-18:00"
+  fri: "08:00-18:00"
+  sat: "09:00-14:00"
+quiet_hours:
+  start: "21:00"
+  end: "08:00"
+service_area_zips:
+  - "80202-80212"
+  - "80218-80224"
+  - "80903-80911"
+  - "80521-80528"
+logo: logo.svg
+brand_color: "#F59E0B"

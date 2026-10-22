@@ -1,0 +1,67 @@
+required_fields:
+  - key: zip
+    type: zip
+    question: What's the zip code of the home you're looking at solar for?
+  - key: homeowner
+    type: choice
+    options: [owner, renter]
+    question: Do you own the home, or rent?
+  - key: monthly_bill
+    type: number
+    question: Roughly what's your average monthly electric bill, in dollars?
+  - key: roof_type
+    type: choice
+    options: [asphalt_shingle, tile, metal, flat, other, unknown]
+    question: What kind of roof is it (asphalt shingle, tile, metal, flat)? Not sure is fine.
+  - key: timeline
+    type: choice
+    options: [asap, one_to_three_months, three_to_six_months, researching]
+    question: When are you hoping to have solar installed?
+
+disqualify_if:
+  - name: renter
+    when: [{field: homeowner, op: eq, value: renter}]
+    reason: Renters cannot authorize a roof installation.
+    close_message: >-
+      Thanks for reaching out. We can only install for homeowners, so we're not able to help
+      with a rental. If you buy a home later, we'd love to hear from you.
+  - name: low_bill
+    when: [{field: monthly_bill, op: lt, value: 60}]
+    reason: Electric bill is too low for solar savings to make sense.
+    close_message: >-
+      Thanks for your interest. With a bill that low, solar likely wouldn't save you much,
+      and we'd rather be upfront about that. Reach out anytime if that changes.
+
+score_weights:
+  - name: homeowner
+    when: [{field: homeowner, op: eq, value: owner}]
+    points: 25
+  - name: bill_200_plus
+    when: [{field: monthly_bill, op: gte, value: 200}]
+    points: 25
+  - name: bill_120_to_199
+    when:
+      - {field: monthly_bill, op: gte, value: 120}
+      - {field: monthly_bill, op: lt, value: 200}
+    points: 15
+  - name: timeline_asap
+    when: [{field: timeline, op: eq, value: asap}]
+    points: 25
+  - name: timeline_1_3_months
+    when: [{field: timeline, op: eq, value: one_to_three_months}]
+    points: 15
+  - name: timeline_3_6_months
+    when: [{field: timeline, op: eq, value: three_to_six_months}]
+    points: 5
+  - name: good_roof
+    when: [{field: roof_type, op: in, value: [asphalt_shingle, tile, metal]}]
+    points: 15
+  - name: flat_roof
+    when: [{field: roof_type, op: eq, value: flat}]
+    points: 8
+  - name: has_email
+    when: [{field: email, op: exists}]
+    points: 10
+
+hot_lead_threshold: 70
+warm_lead_threshold: 40

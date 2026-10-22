@@ -1,0 +1,56 @@
+x_weekday_hours: &weekday_hours
+  mon: "09:00-17:00"
+  tue: "09:00-17:00"
+  wed: "09:00-17:00"
+  thu: "09:00-17:00"
+  fri: "09:00-17:00"
+
+x_weekday_plus_sat: &weekday_plus_sat
+  mon: "08:00-17:00"
+  tue: "08:00-17:00"
+  wed: "08:00-17:00"
+  thu: "08:00-17:00"
+  fri: "08:00-17:00"
+  sat: "09:00-13:00"
+
+offices:
+  - id: denver
+    name: Denver Office
+    zips: ["80202-80212", "80218-80224"]
+    reps:
+      - {id: maya_ortiz, name: Maya Ortiz, email: maya.ortiz@example.com, business_hours: *weekday_plus_sat}
+      - {id: dan_whitaker, name: Dan Whitaker, email: dan.whitaker@example.com, business_hours: *weekday_hours}
+      - {id: priya_nair, name: Priya Nair, email: priya.nair@example.com, business_hours: *weekday_hours}
+      - {id: luis_ferreira, name: Luis Ferreira, email: luis.ferreira@example.com, business_hours: *weekday_plus_sat}
+  - id: colorado_springs
+    name: Colorado Springs Office
+    zips: ["80903-80911"]
+    reps:
+      - {id: tom_beckett, name: Tom Beckett, email: tom.beckett@example.com, business_hours: *weekday_hours}
+      - {id: ana_kowalski, name: Ana Kowalski, email: ana.kowalski@example.com, business_hours: *weekday_plus_sat}
+      - {id: jerome_pike, name: Jerome Pike, email: jerome.pike@example.com, business_hours: *weekday_hours}
+      - {id: sofia_reyes, name: Sofia Reyes, email: sofia.reyes@example.com, business_hours: *weekday_hours}
+  - id: fort_collins
+    name: Fort Collins Office
+    zips: ["80521-80528"]
+    reps:
+      - {id: ben_hollis, name: Ben Hollis, email: ben.hollis@example.com, business_hours: *weekday_hours}
+      - {id: grace_tan, name: Grace Tan, email: grace.tan@example.com, business_hours: *weekday_plus_sat}
+      - {id: omar_haddad, name: Omar Haddad, email: omar.haddad@example.com, business_hours: *weekday_hours}
+      - {id: kelly_dunn, name: Kelly Dunn, email: kelly.dunn@example.com, business_hours: *weekday_hours}
+
+assignment: round_robin
+
+hot_lead:
+  notify: immediate
+  slack_mention: true
+  offer_earliest_slot: true
+
+appointment:
+  kind: free in-home solar consultation
+  duration_minutes: 60
+  slots_to_offer: 3
+  lookahead_days: 7
+  minimum_notice_hours: 2
+
+slack_channel: "#new-leads"
