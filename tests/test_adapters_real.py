@@ -145,6 +145,57 @@ def test_hubspot_finds_existing_and_maps_back(hubspot):
     assert crm.find_contact(phone="+19995550000", email=None) is None
 
 
+def test_hubspot_recovers_from_409_when_search_index_lags(hubspot):
+    """Search is eventually consistent: a just-created contact is not found, so the POST conflicts."""
+    crm, fake = hubspot
+    first = crm.upsert_contact(
+        name="Alex Chen",
+        phone=None,
+        email="alex@x.co",
+        properties={"roof_type": "metal"},
+        pipeline="Residential Sales",
+        stage="New Lead",
+    )
+    crm.find_contact = lambda **_: None  # the index has not caught up yet
+    real_post = fake.__call__
+
+    def conflict(req: httpx.Request) -> httpx.Response:
+        if req.method == "POST" and req.url.path == "/crm/v3/objects/contacts":
+            msg = f"Contact already exists. Existing ID: {first.id}"
+            return httpx.Response(409, json={"status": "error", "message": msg})
+        return real_post(req)
+
+    crm.client._transport = httpx.MockTransport(conflict)
+    again = crm.upsert_contact(
+        name="Alex Chen",
+        phone=None,
+        email="alex@x.co",
+        properties={"roof_type": "tile"},
+        pipeline="Residential Sales",
+        stage="Consultation Booked",
+    )
+    assert again.id == first.id and len(fake.contacts) == 1
+    assert fake.contacts[first.id]["properties"]["roof_type"] == "tile"
+    assert len(fake.deals) == 1
+
+
+def test_hubspot_409_without_an_id_still_errors(bundle):
+    client = httpx.Client(
+        base_url=BASE_URL,
+        transport=httpx.MockTransport(
+            lambda r: (
+                httpx.Response(200, json={"results": []})
+                if r.url.path.endswith("/search")
+                else httpx.Response(409, text="duplicate")
+            )
+        ),
+    )
+    with pytest.raises(HubSpotError, match="409"):
+        HubSpotCRM("tok", client=client).upsert_contact(
+            name=None, phone=None, email="a@b.co", properties={}, pipeline="P", stage="S"
+        )
+
+
 def test_hubspot_unknown_stage_is_a_clear_error(hubspot):
     crm, _ = hubspot
     with pytest.raises(HubSpotError, match="Nope"):
@@ -327,11 +378,7 @@ def test_hubspot_properties_script(bundle, capsys, monkeypatch):
     spec.loader.exec_module(mod)
     assert mod.main(["--company", bundle.slug]) == 0
     out = capsys.readouterr().out
-    assert (
-        "monthly_electric_bill" in out
-        and "Residential Sales" in out
-        and "Consultation Booked" in out
-    )
+    assert "monthly_electric_bill" in out and "Inbound Leads" in out and "Appointment Booked" in out
     monkeypatch.delenv("HUBSPOT_TOKEN", raising=False)
     monkeypatch.setattr(mod, "load_dotenv", lambda *a, **k: None)
     assert mod.main(["--company", bundle.slug, "--create"]) == 2

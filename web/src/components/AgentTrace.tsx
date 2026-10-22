@@ -20,9 +20,13 @@ export function formatLatency(ms: number): string {
   return `${(ms / 1000).toFixed(1)} s`;
 }
 
-const clip = (s: string, n = 90) => (s.length > n ? `${s.slice(0, n - 1)}…` : s);
+const clip = (s: string, n = 90) =>
+  s.length > n ? `${s.slice(0, n - 1)}…` : s;
 
-export function summarizeArgs(name: string, args: Record<string, unknown>): string {
+export function summarizeArgs(
+  name: string,
+  args: Record<string, unknown>,
+): string {
   switch (name) {
     case "send_message":
       return clip(`"${String(args.body ?? "")}"`);
@@ -53,11 +57,16 @@ export function summarizeArgs(name: string, args: Record<string, unknown>): stri
   }
 }
 
-export function summarizeResult(name: string, r: Record<string, unknown>): string {
+export function summarizeResult(
+  name: string,
+  r: Record<string, unknown>,
+): string {
   if (typeof r.error === "string") return clip(r.error);
   switch (name) {
     case "send_message":
-      return r.sent ? `sent${r.first_response_seconds != null ? ` (first reply ${r.first_response_seconds}s)` : ""}` : `held: ${String(r.blocked)}`;
+      return r.sent
+        ? `sent${r.first_response_seconds != null ? ` (first reply ${r.first_response_seconds}s)` : ""}`
+        : `held: ${String(r.blocked)}`;
     case "score_lead": {
       const s = r.score as { score: number; tier: string } | undefined;
       return s ? `${s.tier} ${s.score}/100` : "scored";
@@ -87,20 +96,44 @@ const GUARDRAIL_LABEL: Record<string, string> = {
   injection_detected: "Prompt-injection text flagged",
   backstop: "Safety net completed a step",
   human_takeover: "Human took over",
+  agent_resumed: "Handed back to agent",
   llm_error: "Model unavailable",
   model_refusal: "Model declined",
   max_steps: "Step limit reached",
   ignored_after_opt_out: "Ignored message after opt-out",
-  ignored_after_escalation: "Left to the human",
-  ignored_human_takeover: "Left to the human",
+  ignored_after_escalation: "Lead replied",
+  ignored_human_takeover: "Lead replied",
   deferred_delivered: "Held message delivered",
 };
 
 function guardrailDetail(e: GuardrailEvent): string {
   if (e.type === "backstop") return String(e.name ?? "").replace(/_/g, " ");
-  if (e.type === "claim_blocked") return (e.problems as string[] | undefined)?.join("; ") ?? "";
-  if (e.type === "injection_detected") return (e.patterns as string[] | undefined)?.join(", ") ?? "";
+  if (e.type === "claim_blocked")
+    return (e.problems as string[] | undefined)?.join("; ") ?? "";
+  if (e.type === "injection_detected")
+    return (e.patterns as string[] | undefined)?.join(", ") ?? "";
   return "";
+}
+
+/** Handoff events are about people, not safety, so they get a timeline divider instead of a warning box. */
+const HANDOFF_DETAIL: Record<string, string> = {
+  human_takeover: "Agent is now silent",
+  agent_resumed: "Agent replies from the next message",
+  ignored_human_takeover: "Agent stayed silent, a person has it",
+  ignored_after_escalation: "Agent stayed silent, a person has it",
+};
+
+function PersonIcon() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      className="h-3.5 w-3.5"
+      fill="currentColor"
+      aria-hidden
+    >
+      <path d="M10 10a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Zm-6 6.5C4 13.9 6.7 12 10 12s6 1.9 6 4.5c0 .3-.2.5-.5.5h-11a.5.5 0 0 1-.5-.5Z" />
+    </svg>
+  );
 }
 
 const SHOWN_EVENTS = new Set(Object.keys(GUARDRAIL_LABEL));
@@ -121,7 +154,11 @@ export function AgentTrace({
   const [open, setOpen] = useState<Record<string, boolean>>({});
 
   const rows: Row[] = [
-    ...toolCalls.map((call): Row => ({ kind: "tool", at: call.started_at, call })),
+    ...toolCalls.map((call): Row => ({
+      kind: "tool",
+      at: call.started_at,
+      call,
+    })),
     ...guardrailEvents
       .filter((e) => SHOWN_EVENTS.has(e.type))
       .map((event): Row => ({ kind: "guardrail", at: event.at, event })),
@@ -131,7 +168,14 @@ export function AgentTrace({
     end.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [rows.length]);
 
-  if (error) return <ErrorState message={error} onRetry={onRetry} title="Can't load the trace" />;
+  if (error)
+    return (
+      <ErrorState
+        message={error}
+        onRetry={onRetry}
+        title="Can't load the trace"
+      />
+    );
   if (loading) return <Skeleton lines={6} />;
   if (rows.length === 0) {
     return (
@@ -146,17 +190,46 @@ export function AgentTrace({
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <ol className="min-h-0 flex-1 space-y-1.5 overflow-y-auto p-3" aria-label="Agent trace">
+      <ol
+        className="min-h-0 flex-1 space-y-1.5 overflow-y-auto p-3"
+        aria-label="Agent Trace"
+      >
         {rows.map((row, i) =>
-          row.kind === "guardrail" ? (
+          row.kind === "guardrail" && row.event.type in HANDOFF_DETAIL ? (
+            <li
+              key={`h${i}`}
+              data-kind="handoff"
+              className="relative flex animate-rowIn items-center py-1.5"
+            >
+              <span
+                className="absolute inset-x-0 top-1/2 border-t border-dashed border-indigo-200"
+                aria-hidden
+              />
+              <span className="relative mx-auto flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 py-1 pl-1.5 pr-3 text-xs shadow-sm">
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-600 text-white">
+                  <PersonIcon />
+                </span>
+                <span className="font-semibold text-indigo-900">
+                  {GUARDRAIL_LABEL[row.event.type]}
+                </span>
+                <span className="text-indigo-700">
+                  {HANDOFF_DETAIL[row.event.type]}
+                </span>
+              </span>
+            </li>
+          ) : row.kind === "guardrail" ? (
             <li
               key={`g${i}`}
               data-kind="guardrail"
               className="animate-rowIn rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs"
             >
-              <span className="font-semibold text-amber-900">{GUARDRAIL_LABEL[row.event.type]}</span>
+              <span className="font-semibold text-amber-900">
+                {GUARDRAIL_LABEL[row.event.type]}
+              </span>
               {guardrailDetail(row.event) && (
-                <span className="ml-1.5 text-amber-800">{guardrailDetail(row.event)}</span>
+                <span className="ml-1.5 text-amber-800">
+                  {guardrailDetail(row.event)}
+                </span>
               )}
             </li>
           ) : (
@@ -171,7 +244,9 @@ export function AgentTrace({
               <button
                 type="button"
                 aria-expanded={!!open[row.call.id]}
-                onClick={() => setOpen((o) => ({ ...o, [row.call.id]: !o[row.call.id] }))}
+                onClick={() =>
+                  setOpen((o) => ({ ...o, [row.call.id]: !o[row.call.id] }))
+                }
                 className="flex w-full items-start gap-2 px-3 py-2 text-left"
               >
                 <span
@@ -193,7 +268,8 @@ export function AgentTrace({
                   <span
                     className={`block truncate text-xs ${row.call.error ? "text-rose-700" : "text-slate-700"}`}
                   >
-                    {summarizeResult(row.call.name, row.call.result) && `→ ${summarizeResult(row.call.name, row.call.result)}`}
+                    {summarizeResult(row.call.name, row.call.result) &&
+                      `→ ${summarizeResult(row.call.name, row.call.result)}`}
                   </span>
                 </span>
               </button>
@@ -217,8 +293,12 @@ export function AgentTrace({
           ),
         )}
         {working && (
-          <li className="flex items-center gap-2 px-3 py-1 text-xs text-slate-500" aria-label="Agent working">
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-brand" /> Working…
+          <li
+            className="flex items-center gap-2 px-3 py-1 text-xs text-slate-500"
+            aria-label="Agent working"
+          >
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-brand" />{" "}
+            Working…
           </li>
         )}
         <div ref={end} />

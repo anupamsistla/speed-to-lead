@@ -7,6 +7,7 @@ Pipeline and stage labels from config are resolved to HubSpot ids at first use.
 
 from __future__ import annotations
 
+import re
 from typing import Any
 
 import httpx
@@ -119,8 +120,28 @@ class HubSpotCRM:
             )
             contact_id = existing.id
         else:
-            obj = self._req("POST", "/crm/v3/objects/contacts", json={"properties": props})
-            contact_id = str(obj["id"])
+            resp = self.client.request(
+                "POST", "/crm/v3/objects/contacts", json={"properties": props}
+            )
+            if resp.status_code == 409:
+                # Search is eventually consistent: a contact we just created may not be indexed yet.
+                # HubSpot names the existing record in the conflict message, so update that one.
+                m = re.search(r"Existing ID:\s*(\d+)", resp.text)
+                if not m:
+                    raise HubSpotError(
+                        f"HubSpot POST /crm/v3/objects/contacts failed: 409 {resp.text}"
+                    )
+                contact_id = m.group(1)
+                obj = self._req(
+                    "PATCH", f"/crm/v3/objects/contacts/{contact_id}", json={"properties": props}
+                )
+            elif resp.status_code >= 400:
+                raise HubSpotError(
+                    f"HubSpot POST /crm/v3/objects/contacts failed: {resp.status_code} {resp.text}"
+                )
+            else:
+                obj = resp.json()
+                contact_id = str(obj["id"])
         self.update_stage(
             contact_id, pipeline=pipeline, stage=stage, deal_name=name or email or phone
         )

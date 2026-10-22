@@ -7,6 +7,7 @@ import {
   useCompanyConfig,
   useHealth,
   useHumanMessage,
+  useResume,
   useLead,
   useReplayScenario,
   useReply,
@@ -26,7 +27,9 @@ import { deriveTimer } from "./timerPhase";
 import { applyBrand } from "./theme/branding";
 import type { LeadIn } from "./types";
 
-const isDev = () => import.meta.env.DEV || new URLSearchParams(location.search).get("dev") === "1";
+const isDev = () =>
+  import.meta.env.DEV ||
+  new URLSearchParams(location.search).get("dev") === "1";
 
 function readLeadFromHash(): string | null {
   return new URLSearchParams(location.hash.slice(1)).get("lead");
@@ -38,7 +41,10 @@ export default function App() {
 
   const companies = useCompanies();
   const [slug, setSlug] = useState<string | undefined>(
-    () => new URLSearchParams(location.search).get("company") ?? localStorage.getItem("company") ?? undefined,
+    () =>
+      new URLSearchParams(location.search).get("company") ??
+      localStorage.getItem("company") ??
+      undefined,
   );
   const activeSlug = slug ?? companies.data?.default;
   const config = useCompanyConfig(activeSlug);
@@ -54,6 +60,7 @@ export default function App() {
   const reply = useReply(leadId);
   const takeover = useTakeover(leadId);
   const human = useHumanMessage(leadId);
+  const resume = useResume(leadId);
   const clock = useClock();
   const health = useHealth();
   const setClock = useSetClock();
@@ -67,7 +74,11 @@ export default function App() {
   }, [config.data]);
 
   useEffect(() => {
-    history.replaceState(null, "", leadId ? `#lead=${leadId}` : location.pathname + location.search);
+    history.replaceState(
+      null,
+      "",
+      leadId ? `#lead=${leadId}` : location.pathname + location.search,
+    );
   }, [leadId]);
 
   const startLead = (id: string) => {
@@ -104,7 +115,9 @@ export default function App() {
           current={activeSlug}
           onCompany={switchCompany}
           clock={clock.data}
-          onPreset={(preset) => setClock.mutate({ preset, company: activeSlug })}
+          onPreset={(preset) =>
+            setClock.mutate({ preset, company: activeSlug })
+          }
           health={health.data}
           timeZone={config.data?.timezone}
         />
@@ -113,7 +126,11 @@ export default function App() {
       <header className="flex items-center justify-between border-b border-slate-200 bg-white px-6 py-3">
         <div className="flex items-center gap-3">
           {config.data ? (
-            <img src={config.data.logo_url} alt={`${config.data.name} logo`} className="h-9 w-9 rounded" />
+            <img
+              src={config.data.logo_url}
+              alt={`${config.data.name} logo`}
+              className="h-9 w-9 rounded"
+            />
           ) : (
             <div className="h-9 w-9 animate-pulse rounded bg-slate-200" />
           )}
@@ -125,7 +142,8 @@ export default function App() {
           </div>
         </div>
         <p className="hidden text-xs text-slate-500 lg:block">
-          {config.data && `${config.data.appointment_kind} · ${config.data.offices.length} offices · pings ${config.data.slack_channel}`}
+          {config.data &&
+            `${config.data.appointment_kind} · ${config.data.offices.length} offices · pings ${config.data.slack_channel}`}
         </p>
       </header>
 
@@ -139,7 +157,11 @@ export default function App() {
         </div>
       ) : (
         <main className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto p-4 xl:grid-cols-[400px_minmax(0,1fr)_420px] xl:overflow-hidden">
-          <Panel title="Lead simulator" subtitle="Send a lead, watch the conversation" className="max-xl:h-[720px]">
+          <Panel
+            title="Lead Simulator"
+            subtitle="Send a lead, watch the conversation"
+            className="max-xl:h-[720px]"
+          >
             {config.isLoading ? (
               <Skeleton lines={6} />
             ) : (
@@ -162,35 +184,53 @@ export default function App() {
                 scenarios={scenarios.data?.scenarios}
                 scenariosLoading={scenarios.isLoading}
                 scenariosError={scenarios.error?.message}
-                onPlayScenario={(id) => replay.mutate(id, { onSuccess: (r) => startLead(r.lead_id) })}
+                onPlayScenario={(id) =>
+                  replay.mutate(id, { onSuccess: (r) => startLead(r.lead_id) })
+                }
                 playing={replay.isPending}
               />
             )}
           </Panel>
 
-          <Panel title="Rep view" subtitle="What the sales rep sees" className="max-xl:h-[900px]">
+          <Panel
+            title="Representative View"
+            subtitle="What the sales rep sees"
+            className="max-xl:h-[900px]"
+          >
             <RepView
               detail={detail}
               config={config.data}
               loading={config.isLoading || (!!leadId && lead.isLoading)}
               error={lead.error?.message ?? config.error?.message ?? null}
-              onRetry={() => qc.invalidateQueries({ queryKey: keys.lead(leadId ?? "") })}
+              onRetry={() =>
+                qc.invalidateQueries({ queryKey: keys.lead(leadId ?? "") })
+              }
               onTakeover={() => takeover.mutate()}
               onHumanMessage={(text) => human.mutate(text)}
-              actionPending={takeover.isPending}
+              onResume={() => resume.mutate()}
+              actionPending={takeover.isPending || resume.isPending}
             />
           </Panel>
 
           <Panel
-            title="Agent trace"
-            subtitle={stream.connected ? "Live" : leadId ? "Connecting…" : "Waiting for a lead"}
+            title="Agent Trace"
+            subtitle={
+              stream.connected
+                ? "Live"
+                : leadId
+                  ? "Connecting…"
+                  : "Waiting for a lead"
+            }
             className="max-xl:h-[720px]"
             bodyClassName="flex flex-col"
           >
             <div className="border-b border-slate-200 p-3">
               <FirstResponseTimer
                 phase={timer.phase}
-                startedAtMs={startedAt ?? (detail ? Date.parse(detail.lead.created_at) : null)}
+                startedAtMs={
+                  startedAt ??
+                  (detail ? Date.parse(detail.lead.created_at) : null)
+                }
                 seconds={timer.seconds}
                 queuedUntil={timer.queuedUntil}
                 timeZone={config.data?.timezone}
@@ -202,7 +242,9 @@ export default function App() {
                 guardrailEvents={guardrails}
                 loading={!!leadId && lead.isLoading}
                 error={lead.error?.message ?? null}
-                onRetry={() => qc.invalidateQueries({ queryKey: keys.lead(leadId ?? "") })}
+                onRetry={() =>
+                  qc.invalidateQueries({ queryKey: keys.lead(leadId ?? "") })
+                }
                 working={working}
               />
             </div>

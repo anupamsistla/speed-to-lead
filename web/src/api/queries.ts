@@ -86,6 +86,15 @@ export function useTakeover(leadId: string | null) {
   });
 }
 
+export function useResume(leadId: string | null) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () =>
+      unwrap(api.POST("/api/leads/{lead_id}/resume", { params: { path: { lead_id: leadId! } } })),
+    onSuccess: () => qc.invalidateQueries({ queryKey: keys.lead(leadId!) }),
+  });
+}
+
 export function useHumanMessage(leadId: string | null) {
   return useMutation({
     mutationFn: (text: string) =>

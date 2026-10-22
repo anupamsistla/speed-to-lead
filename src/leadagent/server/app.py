@@ -325,6 +325,14 @@ def create_app(
         assert session is not None
         return rt.summary(session)
 
+    @app.post("/api/leads/{lead_id}/resume", response_model=LeadSummary, tags=["leads"])
+    def resume(lead_id: str) -> LeadSummary:
+        """A human hands the lead back. The agent replies to the next lead message."""
+        rt, _ = runtime_for_lead(lead_id)
+        session = rt.resume(lead_id)
+        assert session is not None
+        return rt.summary(session)
+
     @app.post("/api/leads/{lead_id}/human-message", response_model=Message, tags=["leads"])
     def human_message(lead_id: str, body: HumanMessageIn) -> Message:
         """A person replies to the lead from the rep view (also takes over)."""

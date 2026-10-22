@@ -281,6 +281,15 @@ class CompanyRuntime:
             self._sync(session)
         return session
 
+    def resume(self, lead_id: str) -> LeadSession | None:
+        session = self.get_session(lead_id)
+        if session is None:
+            return None
+        with self._lock_for(lead_id):
+            self.agent.resume(session)
+            self._sync(session)
+        return session
+
     def human_message(self, lead_id: str, text: str) -> Message | None:
         """A person replies from the rep view. This also switches the agent off."""
         session = self.get_session(lead_id)

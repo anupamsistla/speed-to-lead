@@ -100,7 +100,7 @@ class CRMContact(APIModel):
 
 
 class Notification(APIModel):
-    kind: Literal["new_lead", "hot_lead", "booked", "escalation"]
+    kind: Literal["new_lead", "hot_lead", "booked", "escalation", "lead_reply"]
     channel: str
     title: str
     fields: dict[str, str] = Field(default_factory=dict)

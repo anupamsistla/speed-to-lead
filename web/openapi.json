@@ -977,7 +977,8 @@
               "new_lead",
               "hot_lead",
               "booked",
-              "escalation"
+              "escalation",
+              "lead_reply"
             ],
             "title": "Kind",
             "type": "string"
@@ -2449,6 +2450,49 @@
           }
         },
         "summary": "Lead Reply",
+        "tags": [
+          "leads"
+        ]
+      }
+    },
+    "/api/leads/{lead_id}/resume": {
+      "post": {
+        "description": "A human hands the lead back. The agent replies to the next lead message.",
+        "operationId": "resume_api_leads__lead_id__resume_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "lead_id",
+            "required": true,
+            "schema": {
+              "title": "Lead Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeadSummary"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Resume",
         "tags": [
           "leads"
         ]

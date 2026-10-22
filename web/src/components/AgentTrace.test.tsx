@@ -48,7 +48,7 @@ describe("AgentTrace", () => {
 
   it("lists tool calls in the order they happened with readable summaries and latency", () => {
     render(<AgentTrace toolCalls={[...calls].reverse()} />);
-    const rows = within(screen.getByRole("list", { name: "Agent trace" })).getAllByRole("listitem");
+    const rows = within(screen.getByRole("list", { name: "Agent Trace" })).getAllByRole("listitem");
     expect(rows.map((r) => within(r).getAllByText(/^[a-z_]+$/)[0].textContent)).toEqual([
       "check_existing_contact",
       "score_lead",
@@ -147,5 +147,21 @@ describe("summaries", () => {
     expect(summarizeResult("search_knowledge", { found: false })).toBe("no match");
     expect(summarizeResult("check_existing_contact", { exists: true })).toBe("existing contact");
     expect(summarizeResult("anything", { error: "boom" })).toBe("boom");
+  });
+
+  it("shows human handoffs as a divider, not a warning", () => {
+    render(
+      <AgentTrace
+        toolCalls={[]}
+        guardrailEvents={[
+          { type: "human_takeover", at: at(1) },
+          { type: "ignored_human_takeover", at: at(2) },
+        ]}
+      />,
+    );
+    const rows = within(screen.getByRole("list", { name: "Agent Trace" })).getAllByRole("listitem");
+    expect(rows[0]).toHaveAttribute("data-kind", "handoff");
+    expect(rows[0]).toHaveTextContent("Human took over");
+    expect(rows[1]).toHaveTextContent("Lead replied");
   });
 });

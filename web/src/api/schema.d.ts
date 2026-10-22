@@ -289,6 +289,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/leads/{lead_id}/resume": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Resume
+         * @description A human hands the lead back. The agent replies to the next lead message.
+         */
+        post: operations["resume_api_leads__lead_id__resume_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/leads/{lead_id}/takeover": {
         parameters: {
             query?: never;
@@ -735,7 +755,7 @@ export interface components {
              * Kind
              * @enum {string}
              */
-            kind: "new_lead" | "hot_lead" | "booked" | "escalation";
+            kind: "new_lead" | "hot_lead" | "booked" | "escalation" | "lead_reply";
             /** Lead Id */
             lead_id: string;
             /** Mention */
@@ -1469,6 +1489,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Accepted"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    resume_api_leads__lead_id__resume_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                lead_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeadSummary"];
                 };
             };
             /** @description Validation Error */

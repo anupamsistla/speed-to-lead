@@ -87,9 +87,9 @@ describe("App", () => {
   it("renders the three panels with their empty states", async () => {
     renderApp();
     await screen.findByRole("heading", { level: 1, name: "Acme Co" });
-    expect(screen.getByRole("region", { name: "Lead simulator" })).toBeInTheDocument();
-    expect(screen.getByRole("region", { name: "Rep view" })).toHaveTextContent("No lead selected");
-    expect(screen.getByRole("region", { name: "Agent trace" })).toHaveTextContent("No tool calls yet");
+    expect(screen.getByRole("region", { name: "Lead Simulator" })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Representative View" })).toHaveTextContent("No lead selected");
+    expect(screen.getByRole("region", { name: "Agent Trace" })).toHaveTextContent("No tool calls yet");
     expect(screen.getByRole("timer")).toHaveAttribute("data-phase", "idle");
   });
 
@@ -103,7 +103,7 @@ describe("App", () => {
     await user.selectOptions(screen.getByLabelText("Company"), "globex");
     expect(await screen.findByRole("heading", { level: 1, name: "Globex Lending" })).toBeInTheDocument();
     await waitFor(() => expect(document.documentElement.style.getPropertyValue("--brand-rgb")).toBe("22 163 74"));
-    expect(screen.getByRole("region", { name: "Rep view" })).toHaveTextContent("No lead selected");
+    expect(screen.getByRole("region", { name: "Representative View" })).toHaveTextContent("No lead selected");
     expect(localStorage.getItem("company")).toBe("globex");
     expect(vi.mocked(api.GET)).toHaveBeenCalledWith("/api/scenarios", { params: { query: { company: "globex" } } });
   });
@@ -143,7 +143,7 @@ describe("App", () => {
 
     // a tool call streamed over SSE appears in the trace
     act(() => FakeEventSource.instances.at(-1)!.emit("tool_call", toolCall({ id: "live1", name: "score_lead", args: { fields: { zip: "80205" } } })));
-    const trace = screen.getByRole("list", { name: "Agent trace" });
+    const trace = screen.getByRole("list", { name: "Agent Trace" });
     await waitFor(() => expect(within(trace).getByText("score_lead")).toBeInTheDocument());
   });
 
@@ -191,6 +191,6 @@ describe("App", () => {
         : (base as (...a: unknown[]) => unknown)(path, ...rest)) as never);
     renderApp();
     expect((await screen.findAllByText(/unknown lead/)).length).toBeGreaterThan(0);
-    expect(screen.getByRole("region", { name: "Rep view" })).toHaveTextContent("Can't load this lead");
+    expect(screen.getByRole("region", { name: "Representative View" })).toHaveTextContent("Can't load this lead");
   });
 });

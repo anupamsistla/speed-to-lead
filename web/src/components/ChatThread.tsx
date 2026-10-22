@@ -13,6 +13,11 @@ interface Props {
   onSend?: (text: string) => void;
   sending?: boolean;
   quickReplies?: string[];
+  label?: string;
+  /** Composer wording. Defaults suit the lead simulator. */
+  inputLabel?: string;
+  placeholder?: string;
+  sendLabel?: string;
 }
 
 const WHO: Record<Message["sender"] & string, { label: string; side: "left" | "right" }> = {
@@ -29,6 +34,10 @@ export function ChatThread({
   onSend,
   sending = false,
   quickReplies = [],
+  label = "Conversation",
+  inputLabel = "Reply as the lead",
+  placeholder = "Reply as the lead…",
+  sendLabel = "Send",
 }: Props) {
   const end = useRef<HTMLDivElement>(null);
   const [draft, setDraft] = useState("");
@@ -49,7 +58,7 @@ export function ChatThread({
       <div
         className="min-h-0 flex-1 space-y-3 overflow-y-auto bg-slate-50 px-4 py-4"
         role="log"
-        aria-label="Conversation"
+        aria-label={label}
         aria-live="polite"
       >
         {messages.length === 0 && deferred.length === 0 && !typing && (
@@ -141,8 +150,8 @@ export function ChatThread({
             <input
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
-              placeholder="Reply as the lead…"
-              aria-label="Reply as the lead"
+              placeholder={placeholder}
+              aria-label={inputLabel}
               className="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
             />
             <button
@@ -150,7 +159,7 @@ export function ChatThread({
               disabled={sending || !draft.trim()}
               className="rounded-lg bg-brand px-3.5 py-2 text-sm font-semibold text-brand-fg hover:bg-brand-strong disabled:opacity-50"
             >
-              Send
+              {sendLabel}
             </button>
           </form>
         </div>

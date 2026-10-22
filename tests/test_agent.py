@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 
 from leadagent.llm import reply, text, tool_use
+from leadagent.models import Message
 from tests.conftest import HOT_FIELDS, NIGHT_TIME
 
 
@@ -107,7 +108,7 @@ def test_full_flow_from_first_message_to_booked_appointment(make_agent, new_lead
 
     assert s.booking and s.booking.office_id == "denver" and s.rep_id == "maya_ortiz"
     contact = ad.crm.get(s.crm_contact_id)
-    assert contact.stage == "Consultation Booked"
+    assert contact.stage == "Appointment Booked"
     assert contact.properties["lead_tier"] == "hot"
     assert [n.kind for n in ad.notifier.sent] == ["hot_lead", "booked"]
     assert all(n.priority == "urgent" for n in ad.notifier.sent)
@@ -441,7 +442,7 @@ def test_booked_lead_reaches_crm_and_rep_even_if_the_model_forgets(make_agent, n
     ]
     agent.handle_inbound(s, "first one")
     assert s.booking
-    assert ad.crm.get(s.crm_contact_id).stage == "Consultation Booked"
+    assert ad.crm.get(s.crm_contact_id).stage == "Appointment Booked"
     assert "booked" in s.notified_kinds
     assert {"backstop:crm_booked", "backstop:notify_rep"} <= set(s.flags)
 
@@ -524,6 +525,55 @@ def test_human_takeover_silences_the_agent(make_agent, new_lead):
     agent.handle_inbound(s, "thanks, one more question")
     assert llm.calls == calls and len(ad.channel.outbox) == sent
     assert agent.registry(s).call("send_message", {"body": "x"})["blocked"] == "human_takeover"
+
+
+def test_lead_reply_after_takeover_pings_the_rep(make_agent, new_lead):
+    agent, llm, ad = make_agent([reply(tool_use("send_message", body="Hi!")), reply(text("."))])
+    s = agent.handle_lead(new_lead())
+    agent.takeover(s)
+    before = len(ad.notifier.sent)
+    agent.handle_inbound(s, "Can you do Thursday instead?")
+    [n] = ad.notifier.sent[before:]
+    assert n.kind == "lead_reply" and n.lead_id == s.lead.id
+    assert n.fields["Message"] == "Can you do Thursday instead?"
+
+
+def test_handing_back_lets_the_agent_reply_with_the_handoff_context(make_agent, new_lead):
+    agent, llm, ad = make_agent(
+        [
+            reply(tool_use("send_message", body="Hi!")),
+            reply(text(".")),
+            reply(tool_use("send_message", body="Welcome back.")),
+            reply(text(".")),
+        ]
+    )
+    s = agent.handle_lead(new_lead())
+    agent.takeover(s)
+    agent.handle_inbound(s, "Can you do Thursday?")
+    s.messages.append(
+        Message(
+            id="h1",
+            lead_id=s.lead.id,
+            direction="outbound",
+            body="Thursday works, Maya here.",
+            created_at=agent.clock.now(),
+            sender="human",
+        )
+    )
+    agent.resume(s)
+    assert not s.human_takeover and s.events[-1]["type"] == "agent_resumed"
+    sent = len(ad.channel.outbox)
+    agent.handle_inbound(s, "Great, see you then")
+    assert len(ad.channel.outbox) == sent + 1
+    blocks = [
+        b.get("text", "")
+        for m in s.history
+        if m["role"] == "user"
+        for b in m["content"]
+        if isinstance(b, dict)
+    ]
+    note = next(t for t in blocks if "handoff_transcript" in t)
+    assert "Thursday works, Maya here." in note and "Can you do Thursday?" in note
 
 
 def test_every_tool_call_is_recorded_with_latency(make_agent, new_lead):

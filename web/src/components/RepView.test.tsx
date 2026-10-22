@@ -13,9 +13,18 @@ describe("RepView", () => {
 
   it("has loading and error states", async () => {
     const onRetry = vi.fn();
-    const { rerender } = render(<RepView detail={undefined} config={undefined} loading />);
+    const { rerender } = render(
+      <RepView detail={undefined} config={undefined} loading />,
+    );
     expect(screen.getByRole("status", { name: "Loading" })).toBeInTheDocument();
-    rerender(<RepView detail={undefined} config={cfg} error="Lead not found" onRetry={onRetry} />);
+    rerender(
+      <RepView
+        detail={undefined}
+        config={cfg}
+        error="Lead not found"
+        onRetry={onRetry}
+      />,
+    );
     expect(screen.getByRole("alert")).toHaveTextContent("Lead not found");
     await userEvent.click(screen.getByRole("button", { name: "Try again" }));
     expect(onRetry).toHaveBeenCalled();
@@ -26,16 +35,26 @@ describe("RepView", () => {
     expect(screen.getByTestId("score-value")).toHaveTextContent("90");
     const card = screen.getByRole("region", { name: "Lead score" });
     expect(within(card).getByText("Hot")).toBeInTheDocument();
-    const items = within(within(card).getByRole("list", { name: "Score breakdown" })).getAllByRole("listitem");
-    expect(items.map((i) => i.textContent)).toEqual(["Homeowner+25", "Timeline ASAP+25", "Bill 200 plus+40"]);
-    expect(within(card).getByText(/Warm from 40, hot from 70/)).toBeInTheDocument();
+    const items = within(
+      within(card).getByRole("list", { name: "Score breakdown" }),
+    ).getAllByRole("listitem");
+    expect(items.map((i) => i.textContent)).toEqual([
+      "Homeowner+25",
+      "Timeline ASAP+25",
+      "Bill 200 plus+40",
+    ]);
+    expect(
+      within(card).getByText(/Warm from 40, hot from 70/),
+    ).toBeInTheDocument();
   });
 
   it("marks a partial score as provisional", () => {
     const d = detail();
     d.score = { ...d.score!, complete: false, tier: "warm", score: 50 };
     render(<RepView detail={d} config={cfg} />);
-    expect(screen.getByText(/provisional until all answers are in/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/provisional until all answers are in/),
+    ).toBeInTheDocument();
   });
 
   it("explains a disqualified lead instead of showing a score", () => {
@@ -48,11 +67,19 @@ describe("RepView", () => {
       disqualified_reason: "Zip 10001 is outside the service area.",
       disqualified_by: "out_of_area",
     };
-    d.routing = { office_id: null, office_name: null, rep_id: null, rep_name: null, reason: "Zip 10001 is outside the service area." };
+    d.routing = {
+      office_id: null,
+      office_name: null,
+      rep_id: null,
+      rep_name: null,
+      reason: "Zip 10001 is outside the service area.",
+    };
     render(<RepView detail={d} config={cfg} />);
     expect(screen.getByTestId("score-value")).toHaveTextContent("n/a");
     expect(screen.getByText("Disqualified")).toBeInTheDocument();
-    expect(screen.getAllByText(/outside the service area/).length).toBeGreaterThan(0);
+    expect(
+      screen.getAllByText(/outside the service area/).length,
+    ).toBeGreaterThan(0);
     expect(screen.getByText(/Not booked/)).toBeInTheDocument();
     expect(screen.getByText(/closed, not booked/)).toBeInTheDocument();
   });
@@ -81,7 +108,9 @@ describe("RepView", () => {
 
   it("shows the booked appointment, or that there is none", () => {
     const { rerender } = render(<RepView detail={detail()} config={cfg} />);
-    expect(screen.getByRole("region", { name: "Appointment" })).toHaveTextContent("No appointment yet");
+    expect(
+      screen.getByRole("region", { name: "Appointment" }),
+    ).toHaveTextContent("No appointment yet");
     rerender(
       <RepView
         config={cfg}
@@ -117,7 +146,12 @@ describe("RepView", () => {
     expect(card).toHaveTextContent("90");
 
     const d = detail();
-    d.crm = { ...d.crm, synced: true, stage: "Consultation Booked", contact_id: "crm_1" };
+    d.crm = {
+      ...d.crm,
+      synced: true,
+      stage: "Consultation Booked",
+      contact_id: "crm_1",
+    };
     rerender(<RepView detail={d} config={cfg} />);
     card = screen.getByRole("region", { name: "CRM record" });
     expect(card).toHaveTextContent("Consultation Booked");
@@ -128,7 +162,19 @@ describe("RepView", () => {
     render(
       <RepView
         config={cfg}
-        detail={detail({ notifications: [notification(), notification({ kind: "booked", title: "Booked!", priority: "normal", mention: null, note: null, created_at: at(9) })] })}
+        detail={detail({
+          notifications: [
+            notification(),
+            notification({
+              kind: "booked",
+              title: "Booked!",
+              priority: "normal",
+              mention: null,
+              note: null,
+              created_at: at(9),
+            }),
+          ],
+        })}
       />,
     );
     const cards = screen.getAllByTestId("slack-card");
@@ -139,8 +185,9 @@ describe("RepView", () => {
     expect(cards[0]).toHaveTextContent("90/100 (hot)");
     expect(cards[0]).toHaveTextContent("#new-leads");
     expect(cards[0]).toHaveTextContent("Wants to move fast");
-    expect(cards[0].className).toMatch(/border-l-rose/); // urgent
-    expect(cards[1].className).not.toMatch(/border-l-rose/);
+    expect(cards[0]).toHaveAttribute("data-priority", "urgent");
+    expect(cards[0]).toHaveTextContent("🚨");
+    expect(cards[1]).not.toHaveTextContent("🚨");
   });
 
   it("says nobody has been pinged yet", () => {
@@ -150,9 +197,18 @@ describe("RepView", () => {
 
   it("shows flags only when there are some", () => {
     const { rerender } = render(<RepView detail={detail()} config={cfg} />);
-    expect(screen.queryByRole("region", { name: "Flags" })).not.toBeInTheDocument();
-    rerender(<RepView detail={detail({ flags: ["prompt_injection_attempt"] })} config={cfg} />);
-    expect(screen.getByRole("region", { name: "Flags" })).toHaveTextContent("prompt_injection_attempt");
+    expect(
+      screen.queryByRole("region", { name: "Flags" }),
+    ).not.toBeInTheDocument();
+    rerender(
+      <RepView
+        detail={detail({ flags: ["prompt_injection_attempt"] })}
+        config={cfg}
+      />,
+    );
+    expect(screen.getByRole("region", { name: "Flags" })).toHaveTextContent(
+      "prompt_injection_attempt",
+    );
   });
 
   it("lets a person take over, then message the lead as the rep", async () => {
@@ -160,7 +216,12 @@ describe("RepView", () => {
     const onTakeover = vi.fn();
     const onHumanMessage = vi.fn();
     const { rerender } = render(
-      <RepView detail={detail()} config={cfg} onTakeover={onTakeover} onHumanMessage={onHumanMessage} />,
+      <RepView
+        detail={detail()}
+        config={cfg}
+        onTakeover={onTakeover}
+        onHumanMessage={onHumanMessage}
+      />,
     );
     await user.click(screen.getByRole("button", { name: "Take over" }));
     expect(onTakeover).toHaveBeenCalled();
@@ -168,9 +229,21 @@ describe("RepView", () => {
 
     const human = detail();
     human.summary = { ...human.summary, status: "human" };
-    rerender(<RepView detail={human} config={cfg} onTakeover={onTakeover} onHumanMessage={onHumanMessage} />);
-    expect(screen.queryByRole("button", { name: "Take over" })).not.toBeInTheDocument();
-    await user.type(screen.getByLabelText("Message as rep"), "Hi, it's Maya{enter}");
+    rerender(
+      <RepView
+        detail={human}
+        config={cfg}
+        onTakeover={onTakeover}
+        onHumanMessage={onHumanMessage}
+      />,
+    );
+    expect(
+      screen.queryByRole("button", { name: "Take over" }),
+    ).not.toBeInTheDocument();
+    await user.type(
+      screen.getByLabelText("Message as rep"),
+      "Hi, it's Maya{enter}",
+    );
     expect(onHumanMessage).toHaveBeenCalledWith("Hi, it's Maya");
   });
 
@@ -179,5 +252,44 @@ describe("RepView", () => {
     expect(screen.getByText("In progress")).toBeInTheDocument();
     expect(screen.getByText("SMS: Unknown")).toBeInTheDocument();
     expect(screen.getByText("Web form")).toBeInTheDocument();
+  });
+});
+
+describe("RepView conversation", () => {
+  it("hides the conversation until a human has taken over", () => {
+    render(<RepView detail={detail()} config={cfg} />);
+    expect(screen.queryByRole("region", { name: "Lead conversation" })).not.toBeInTheDocument();
+  });
+
+  it("shows what the lead writes, including after a takeover", () => {
+    const d = detail({
+      summary: { ...detail().summary, status: "human" },
+      messages: [
+        {
+          id: "m1",
+          lead_id: "ld_1",
+          direction: "inbound",
+          body: "Can you do Thursday instead?",
+          created_at: at(9),
+          sender: "lead",
+          sent: true,
+        },
+      ],
+    });
+    render(<RepView detail={d} config={cfg} onHumanMessage={() => {}} />);
+    expect(
+      screen.getByRole("log", { name: "Live messages" }),
+    ).toHaveTextContent("Can you do Thursday instead?");
+  });
+
+  it("lets a person hand the lead back to the agent", async () => {
+    const user = userEvent.setup();
+    const onResume = vi.fn();
+    const human = detail({ summary: { ...detail().summary, status: "human" } });
+    const { rerender } = render(<RepView detail={human} config={cfg} onResume={onResume} />);
+    await user.click(screen.getByRole("button", { name: "Hand back to agent" }));
+    expect(onResume).toHaveBeenCalled();
+    rerender(<RepView detail={detail()} config={cfg} onResume={onResume} />);
+    expect(screen.queryByRole("button", { name: "Hand back to agent" })).not.toBeInTheDocument();
   });
 });

@@ -27,6 +27,8 @@ class LeadSession(BaseModel):
     escalated: bool = False
     escalation_reason: str | None = None
     human_takeover: bool = False  # a person has taken over; the agent must stay silent
+    takeover_msg_index: int | None = None  # len(messages) when a person took over
+    handback_note: str | None = None  # what happened while a person had it; shown to the agent once
     flags: list[str] = Field(default_factory=list)
     kb_misses: int = 0
     crm_contact_id: str | None = None

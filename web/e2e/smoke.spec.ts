@@ -22,7 +22,7 @@ test("submit a lead and see a booked appointment", async ({ page }) => {
   await page.screenshot({ path: "test-results/2-offered.png" });
 
   // Live trace shows the tool calls that got us here.
-  const trace = page.getByRole("list", { name: "Agent trace" });
+  const trace = page.getByRole("list", { name: "Agent Trace" });
   await expect(trace).toContainText("check_existing_contact");
   await expect(trace).toContainText("get_slots");
 
@@ -33,7 +33,7 @@ test("submit a lead and see a booked appointment", async ({ page }) => {
   await expect(booking).toBeVisible();
   await expect(booking).toContainText("Booked");
   await expect(page.getByLabel("Appointment")).toContainText(/consultation/i);
-  await expect(page.getByLabel("CRM record")).toContainText("Consultation Booked");
+  await expect(page.getByLabel("CRM record")).toContainText("Appointment Booked");
   await expect(page.getByTestId("slack-card")).toHaveCount(2); // hot-lead ping, then booked
   await expect(trace).toContainText("book_appointment");
   await page.screenshot({ path: "test-results/3-booked.png" });
