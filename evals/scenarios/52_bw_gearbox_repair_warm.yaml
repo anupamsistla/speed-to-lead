@@ -1,0 +1,22 @@
+id: bw_gearbox_repair_warm
+title: Gearbox repair, answers over several turns, warm
+description: >-
+  An end user with a gearbox problem answers piece by piece. The agent should ask only what is missing, score as warm, route to the Pittsburgh gear center and book.
+company: broadwind_energy
+clock: "2026-10-27T10:00:00-05:00"
+lead:
+  name: Pat Dolan
+  phone: "+14125550177"
+  source: web_form
+  message: Hi, we have a gearbox that needs repair and I would like to find out what you can do.
+followups:
+  - We are the end user. The plant is in Pittsburgh, zip 15201.
+  - We do not have drawings, it is an older unit.
+  - Probably within the next 6 months.
+  - The first one works for me.
+expect:
+  qualified: true
+  tier: warm
+  office: brad_foote_gearing_and_gearbox_repair_center_pittsburgh
+  booked: true
+  crm_written: true

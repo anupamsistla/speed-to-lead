@@ -1,0 +1,21 @@
+Draft for https://www.bwen.com/
+
+Pages read:
+  https://www.bwen.com/
+  https://www.bwen.com/about/locations/
+  https://www.bwen.com/products-solutions/
+  https://www.bwen.com/products-solutions/heavy-fabrications/
+  https://www.bwen.com/products-solutions/industrial-gears-gearboxes/
+  https://www.bwen.com/products-solutions/procurement-supply-chain/
+  https://www.bwen.com/products-solutions/kitting-assembly/
+  https://www.bwen.com/products-solutions/material-handling/
+  https://www.bwen.com/products-solutions/design-for-manufacturing/
+  https://www.bwen.com/contact/
+  https://www.bwen.com/markets/steel-processing/
+  https://www.bwen.com/about/
+
+Phone on the site: 708-780-4800
+Email on the site: info@bwen.com
+
+Next: resolve every TODO (grep -rn TODO .), then run:
+  python run.py --company <slug> --check

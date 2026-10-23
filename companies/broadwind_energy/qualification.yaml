@@ -1,0 +1,55 @@
+# qualification.yaml. Drafted from https://www.bwen.com/ on 2026-10-23, then completed by hand.
+# ASSUMPTION: the questions, weights and thresholds are demo choices for a B2B manufacturer.
+
+required_fields:
+  - key: zip
+    type: zip
+    question: "What is the zip code of the project or delivery location?"
+  - key: product_interest
+    type: choice
+    options: ["heavy_fabrications", "industrial_gears_and_gearboxes", "heat_treatment", "kitting_and_assembly", "material_handling", "other"]
+    question: "Which product or service are you interested in?"
+  - key: buyer_type
+    type: choice
+    options: ["oem", "end_user", "aftermarket", "other"]
+    question: "Which best describes your company?"
+  - key: has_specs
+    type: boolean
+    question: "Do you have drawings or specifications ready for quoting?"
+  - key: timeline
+    type: choice
+    options: ["immediately", "1_3_months", "3_12_months", "just_researching"]
+    question: "When do you need the work started?"
+
+disqualify_if:
+  - name: not_a_manufacturing_need
+    when: [{field: product_interest, op: eq, value: "other"}]
+    reason: "The inquiry falls outside the heavy manufacturing services offered."
+    close_message: "Thanks for reaching out. Your request looks outside our manufacturing services, so we'll point you to the right contact."
+  - name: just_researching
+    when: [{field: timeline, op: eq, value: "just_researching"}]
+    reason: "No active project or purchase intent yet."
+    close_message: "Thanks for your interest. Reach out again when you have a project and specifications ready."
+
+score_weights:
+  - name: has_drawings_or_specs
+    when: [{field: has_specs, op: eq, value: true}]
+    points: 20
+  - name: oem_or_end_user
+    when: [{field: buyer_type, op: in, value: ["oem", "end_user"]}]
+    points: 20
+  - name: near_term_timeline
+    when: [{field: timeline, op: in, value: ["immediately", "1_3_months"]}]
+    points: 25
+  - name: core_product_interest
+    when: [{field: product_interest, op: in, value: ["heavy_fabrications", "industrial_gears_and_gearboxes", "kitting_and_assembly", "heat_treatment", "material_handling"]}]
+    points: 15
+  - name: phone_provided
+    when: [{field: phone, op: exists}]
+    points: 10
+  - name: email_provided
+    when: [{field: email, op: exists}]
+    points: 10
+
+hot_lead_threshold: 70
+warm_lead_threshold: 40

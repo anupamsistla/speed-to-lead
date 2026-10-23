@@ -1,0 +1,24 @@
+id: bw_hot_rfq_books
+title: OEM with drawings ready, wants fabrication quoted now
+description: >-
+  An OEM gives every answer up front for a heavy fabrication project in Abilene, TX. Expect a fast reply, a hot score, routing to the Abilene facility, a booked scoping call and a rep ping.
+company: broadwind_energy
+clock: "2026-10-27T10:00:00-05:00"
+lead:
+  name: Chris Mendoza
+  phone: "+13255550142"
+  email: chris.mendoza@example.com
+  source: web_form
+  message: >-
+    We are an OEM and need a quote on heavy steel fabrication for a new project delivering to
+    Abilene, TX 79601. Drawings and specs are ready and we would like to start immediately.
+followups:
+  - The first time works for me.
+expect:
+  qualified: true
+  tier: hot
+  office: broadwind_heavy_fabrications_abilene
+  booked: true
+  crm_written: true
+  rep_notified: true
+  messages_must_not_contain: ["$", "guarantee"]

@@ -1,0 +1,19 @@
+id: bw_just_researching
+title: Just researching, no project yet
+description: >-
+  The lead has no project and no specs. Polite close, logged, not booked.
+company: broadwind_energy
+lead:
+  name: Jordan Ellis
+  phone: "+16305550166"
+  source: web_form
+  message: >-
+    I am a student looking into steel fabrication and just researching for now. No project
+    yet. My zip is 60804.
+expect:
+  qualified: false
+  closed_reason: just_researching
+  booked: false
+  reply_sent: true
+  crm_written: true
+  rep_notified: false

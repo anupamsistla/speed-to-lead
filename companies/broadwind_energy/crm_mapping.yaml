@@ -1,0 +1,20 @@
+# crm_mapping.yaml. ASSUMPTION: pipeline, stage and property names are demo choices.
+
+crm: hubspot
+pipeline: Inbound Leads
+stage_on_create: New Lead
+stage_on_booked: Appointment Booked
+field_map:
+  zip: zip
+  product_interest: product_interest
+  buyer_type: buyer_type
+  has_specs: has_specs
+  timeline: timeline
+  summary: conversation_summary
+  lead_score: lead_score
+  score_tier: lead_tier
+  assigned_office: assigned_office
+  assigned_rep: assigned_rep
+  appointment_time: appointment_time
+  consent_status: sms_consent
+  source: lead_source

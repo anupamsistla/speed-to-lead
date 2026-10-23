@@ -1,0 +1,72 @@
+# routing.yaml. Drafted by scripts/draft_company.py from https://www.bwen.com/ on 2026-10-23,
+# then completed by hand. Office names are from https://www.bwen.com/about/locations/.
+# ASSUMPTION: the site lists no zip coverage, so each office is given a US region (by leading zip
+# digits). The Chicago gear repair center shares the Cicero site and is covered by the HQ entry.
+# ASSUMPTION: every rep below is a fictional placeholder (reps are never on a public website).
+
+offices:
+  - id: broadwind_corporate_headquarters
+    name: "Broadwind Corporate Headquarters"
+    zips: ["40000-52999", "60000-69999"]
+    reps:
+      - id: dana_whitfield
+        name: "Dana Whitfield"
+        email: dana_whitfield@bwen.com
+        business_hours: {mon: "08:00-17:00", tue: "08:00-17:00", wed: "08:00-17:00", thu: "08:00-17:00", fri: "08:00-17:00"}
+      - id: marcus_hale
+        name: "Marcus Hale"
+        email: marcus_hale@bwen.com
+        business_hours: {mon: "08:00-17:00", tue: "08:00-17:00", wed: "08:00-17:00", thu: "08:00-17:00", fri: "08:00-17:00"}
+  - id: broadwind_heavy_fabrications_manitowoc_administrative_office
+    name: "Broadwind Heavy Fabrications – Manitowoc Administrative Office"
+    zips: ["53000-59999"]
+    reps:
+      - id: priya_raman
+        name: "Priya Raman"
+        email: priya_raman@bwen.com
+        business_hours: {mon: "08:00-17:00", tue: "08:00-17:00", wed: "08:00-17:00", thu: "08:00-17:00", fri: "08:00-17:00"}
+      - id: tom_kowalski
+        name: "Tom Kowalski"
+        email: tom_kowalski@bwen.com
+        business_hours: {mon: "08:00-17:00", tue: "08:00-17:00", wed: "08:00-17:00", thu: "08:00-17:00", fri: "08:00-17:00"}
+  - id: broadwind_heavy_fabrications_abilene
+    name: "Broadwind Heavy Fabrications – Abilene"
+    zips: ["70000-99999"]
+    reps:
+      - id: elena_ruiz
+        name: "Elena Ruiz"
+        email: elena_ruiz@bwen.com
+        business_hours: {mon: "08:00-17:00", tue: "08:00-17:00", wed: "08:00-17:00", thu: "08:00-17:00", fri: "08:00-17:00"}
+  - id: brad_foote_gearing_and_gearbox_repair_center_pittsburgh
+    name: "Brad Foote Gearing and Gearbox Repair Center – Pittsburgh"
+    zips: ["00501-19999"]
+    reps:
+      - id: greg_andersen
+        name: "Greg Andersen"
+        email: greg_andersen@bwen.com
+        business_hours: {mon: "08:00-17:00", tue: "08:00-17:00", wed: "08:00-17:00", thu: "08:00-17:00", fri: "08:00-17:00"}
+  - id: broadwind_industrial_solutions
+    name: "Broadwind Industrial Solutions"
+    zips: ["20000-39999"]
+    reps:
+      - id: sam_okafor
+        name: "Sam Okafor"
+        email: sam_okafor@bwen.com
+        business_hours: {mon: "08:00-17:00", tue: "08:00-17:00", wed: "08:00-17:00", thu: "08:00-17:00", fri: "08:00-17:00"}
+
+assignment: round_robin
+
+hot_lead:
+  notify: immediate
+  slack_mention: true
+  offer_earliest_slot: true
+
+appointment:
+  kind: "Project scoping call"  # ASSUMPTION: what the first appointment is called.
+  duration_minutes: 30  # ASSUMPTION
+  slots_to_offer: 3
+  lookahead_days: 7
+  minimum_notice_hours: 2
+  confirmation_note: "A Zoom meeting invite has been sent to your email."  # ASSUMPTION: said in every booking confirmation
+
+slack_channel: "#inbound-leads"  # ASSUMPTION: the channel that gets lead pings.

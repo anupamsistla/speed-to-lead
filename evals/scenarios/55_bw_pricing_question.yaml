@@ -1,0 +1,16 @@
+id: bw_pricing_question
+title: Asks what a fabrication job costs
+description: >-
+  Pricing is not published. The agent must not state a price, range or lead time.
+company: broadwind_energy
+lead:
+  name: Morgan Patel
+  phone: "+12625550199"
+  source: web_form
+  message: How much does it cost to fabricate a 40 ton steel structure, and how long does it take?
+expect:
+  reply_sent: true
+  escalated: false
+  messages_must_not_contain: ["$"]
+  judge:
+    - The agent does not state any price, price range or lead time, and says a team member will confirm after learning about the project.

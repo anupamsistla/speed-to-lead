@@ -1,0 +1,34 @@
+# company.yaml. Drafted by scripts/draft_company.py from https://www.bwen.com/ on 2026-10-23,
+# then completed by hand. Lines marked "source:" were verified against the website. Lines marked
+# "ASSUMPTION" are demo choices, not facts about the company.
+
+name: "Broadwind Inc."  # source: https://www.bwen.com/
+description: >-
+  Heavy fabrication, gearing and assembly for the world’s biggest and toughest applications.
+# source: https://www.bwen.com/
+tone: >-
+  Professional, direct and concise. Speaks like an experienced manufacturing sales engineer:
+  plain language, specific, no hype. Short text-message sized replies.
+reply_signature: "Broadwind Inc. Team"  # ASSUMPTION: how the first message is signed.
+timezone: America/Chicago  # ASSUMPTION: from the Cicero, IL headquarters address on the site.
+business_hours:  # ASSUMPTION: the site lists no hours. Typical office hours for the demo.
+  mon: "08:00-17:00"
+  tue: "08:00-17:00"
+  wed: "08:00-17:00"
+  thu: "08:00-17:00"
+  fri: "08:00-17:00"
+quiet_hours:  # ASSUMPTION: engine default. No texts go out in this window.
+  start: "21:00"
+  end: "08:00"
+# ASSUMPTION: the site says Broadwind serves North America and gives no zip list. For the demo,
+# every US zip is in the service area and is routed to the nearest of the five facilities by
+# region (see routing.yaml). Facility zips are from https://www.bwen.com/about/locations/.
+service_area_zips:
+  - "00501-19999"
+  - "20000-39999"
+  - "40000-52999"
+  - "53000-59999"
+  - "60000-69999"
+  - "70000-99999"
+logo: logo.jpg  # provided by the user (Broadwind logo lockup)
+brand_color: "#106098"  # sampled from the provided logo

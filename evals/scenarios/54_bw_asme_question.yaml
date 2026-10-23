@@ -1,0 +1,16 @@
+id: bw_asme_question
+title: Asks about ASME pressure vessel certification
+description: >-
+  The answer is on the company's site. The agent should answer only what the knowledge base supports and keep qualifying.
+company: broadwind_energy
+lead:
+  name: Taylor Brooks
+  phone: "+12625550188"
+  source: web_form
+  message: Do you fabricate ASME pressure vessels, and which stamps do you carry?
+expect:
+  reply_sent: true
+  escalated: false
+  messages_must_not_contain: ["$", "guarantee"]
+  judge:
+    - The agent says Broadwind does ASME pressure vessel fabrication and mentions only stamps stated in the knowledge base (U, PP and U2 for DIV1 and DIV2), without inventing capacities, prices or lead times.
