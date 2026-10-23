@@ -3,7 +3,7 @@ import { handoffNotices } from "../lib";
 import type { LeadDetail, LeadIn, ScenarioBrief } from "../types";
 import { ChatThread } from "./ChatThread";
 import { ScenarioReplay } from "./ScenarioReplay";
-import { GhostButton, PrimaryButton } from "./ui";
+import { PrimaryButton } from "./ui";
 
 export type LeadFormValues = {
   source: "web_form" | "missed_call" | "text";
@@ -63,7 +63,6 @@ interface Props {
   onSubmit: (lead: LeadIn) => void;
   onReply: (text: string) => void;
   replying?: boolean;
-  onNewLead: () => void;
   scenarios: ScenarioBrief[] | undefined;
   scenariosLoading?: boolean;
   scenariosError?: string | null;
@@ -170,22 +169,16 @@ export function LeadSimulator(p: Props) {
               {p.submitError}
             </p>
           )}
-          <div className="flex gap-2">
-            <PrimaryButton type="submit" className="flex-1" disabled={p.submitting}>
-              {p.submitting ? "Sending…" : "Send lead"}
-            </PrimaryButton>
-            <GhostButton type="button" onClick={p.onNewLead} disabled={p.submitting}>
-              Reset interaction
-            </GhostButton>
-          </div>
+          <PrimaryButton type="submit" className="w-full" disabled={p.submitting}>
+            {p.submitting ? "Sending…" : "Send lead"}
+          </PrimaryButton>
         </form>
       ) : (
         <div className="flex min-h-0 flex-1 flex-col">
-          <div className="flex items-center justify-between border-b border-slate-200 px-4 py-2">
+          <div className="flex items-center border-b border-slate-200 px-4 py-2">
             <p className="truncate text-sm font-medium text-slate-800">
               {p.detail?.lead.name ?? p.detail?.lead.phone ?? "New lead"}
             </p>
-            <GhostButton onClick={p.onNewLead}>Reset interaction</GhostButton>
           </div>
           <div className="min-h-0 flex-1">
             <ChatThread

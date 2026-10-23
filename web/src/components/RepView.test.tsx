@@ -41,7 +41,7 @@ describe("RepView", () => {
     expect(items.map((i) => i.textContent)).toEqual([
       "Homeowner+25",
       "Timeline ASAP+25",
-      "Bill 200 plus+40",
+      "Bill 200++40",
     ]);
     expect(
       within(card).getByText(/Warm from 40, hot from 70/),

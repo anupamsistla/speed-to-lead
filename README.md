@@ -112,7 +112,7 @@ Everything lives in `companies/<slug>/`. A test fails if any company slug or nam
 |---|---|
 | `offices` | Each has `zips` and `reps`. Zip to office routing, round robin within an office |
 | `reps` | `name`, `email`, optional `slack_user_id`, and `business_hours` that drive their calendar |
-| `appointment` | `kind`, `duration_minutes`, `slots_to_offer`, `lookahead_days`, `minimum_notice_hours` |
+| `appointment` | `kind`, `duration_minutes`, `slots_to_offer`, `lookahead_days`, `minimum_notice_hours`, optional `confirmation_note` (said word for word when a booking is confirmed) |
 | `hot_lead` | Immediate notification, @mention, earliest slots |
 | `slack_channel` | Shown in notifications |
 

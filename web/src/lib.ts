@@ -69,7 +69,10 @@ export const STATUS_LABEL: Record<LeadStatus, string> = {
 const ACRONYMS = new Set(["asap", "crm", "sms", "faq", "apr", "ltv"]);
 
 export function humanize(key: string): string {
-  const words = key.replace(/_/g, " ").split(" ");
+  // 1_3_months reads as "1-3 months", not "1 3 months"
+  const words = key
+    .replace(/(?<=\d)_plus\b/g, "+")
+    .replace(/(?<=\d)_(?=\d)/g, "-").replace(/_/g, " ").split(" ");
   const out = words.map((w) => (ACRONYMS.has(w.toLowerCase()) ? w.toUpperCase() : w));
   const s = out.join(" ");
   return ACRONYMS.has(words[0].toLowerCase()) ? s : s.charAt(0).toUpperCase() + s.slice(1);

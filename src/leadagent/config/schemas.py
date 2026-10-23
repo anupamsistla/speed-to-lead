@@ -300,6 +300,11 @@ class AppointmentConfig(Strict):
     slots_to_offer: int = Field(default=3, gt=0)
     lookahead_days: int = Field(default=7, gt=0)
     minimum_notice_hours: int = Field(default=2, ge=0)
+    confirmation_note: str | None = Field(
+        default=None,
+        description='Said word for word in the booking confirmation, e.g. "A Zoom meeting invite '
+        'has been sent to your email."',
+    )
 
 
 class RoutingConfig(Strict):

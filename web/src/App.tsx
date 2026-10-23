@@ -21,7 +21,7 @@ import { DevHeader } from "./components/DevHeader";
 import { FirstResponseTimer } from "./components/FirstResponseTimer";
 import { LeadSimulator } from "./components/LeadSimulator";
 import { RepView } from "./components/RepView";
-import { ErrorState, Panel, Skeleton } from "./components/ui";
+import { ErrorState, GhostButton, Panel, Skeleton } from "./components/ui";
 import { useLeadStream } from "./hooks/useLeadStream";
 import { deriveTimer } from "./timerPhase";
 import { applyBrand } from "./theme/branding";
@@ -101,6 +101,18 @@ export default function App() {
     );
   }, [leadId]);
 
+  const resetInteraction = () => {
+    setLeadId(null);
+    setStartedAt(null);
+    submit.reset();
+    setResetCount((n) => n + 1);
+    replay.reset();
+    reply.reset();
+    takeover.reset();
+    resume.reset();
+    human.reset();
+  };
+
   const startLead = (id: string) => {
     setStartedAt(Date.now());
     setLeadId(id);
@@ -149,7 +161,7 @@ export default function App() {
             <img
               src={config.data.logo_url}
               alt={`${config.data.name} logo`}
-              className="h-9 w-9 rounded"
+              className="h-10 w-auto max-w-[140px] rounded object-contain"
             />
           ) : (
             <div className="h-9 w-9 animate-pulse rounded bg-slate-200" />
@@ -200,6 +212,7 @@ export default function App() {
           <Panel
             title="Lead Simulator"
             subtitle="Send a lead, watch the conversation"
+            actions={<GhostButton onClick={resetInteraction}>Reset interaction</GhostButton>}
             className="max-xl:h-[720px]"
           >
             {config.isLoading ? (
@@ -217,17 +230,6 @@ export default function App() {
                 onSubmit={submitLead}
                 onReply={(text) => reply.mutate(text)}
                 replying={reply.isPending}
-                onNewLead={() => {
-                  setLeadId(null);
-                  setStartedAt(null);
-                  submit.reset();
-                  setResetCount((n) => n + 1);
-                  replay.reset();
-                  reply.reset();
-                  takeover.reset();
-                  resume.reset();
-                  human.reset();
-                }}
                 scenarios={scenarios.data?.scenarios}
                 scenariosLoading={scenarios.isLoading}
                 scenariosError={scenarios.error?.message}

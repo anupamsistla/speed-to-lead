@@ -7,6 +7,7 @@ not from free-form arguments.
 
 from __future__ import annotations
 
+import re
 from datetime import datetime, time, timedelta
 from typing import Any
 from zoneinfo import ZoneInfo
@@ -19,6 +20,14 @@ from leadagent.session import DeferredMessage
 from leadagent.tools.context import ToolContext
 
 MAX_MESSAGE_CHARS = 1000
+# Slack gets at most two pings per lead: one when the lead is in, one when it is booked.
+NUMBER_WORDS = {
+    w: str(i)
+    for i, w in enumerate(
+        "one two three four five six seven eight nine ten eleven twelve".split(), start=1
+    )
+}
+LEAD_PING_KINDS = ("new_lead", "hot_lead", "escalation")
 CONTACT_KEYS = ("name", "phone", "email")
 FLAG_REASONS = (
     "pricing_question",
@@ -28,6 +37,36 @@ FLAG_REASONS = (
     "other",
 )
 ESCALATION_REASONS = ("angry", "requested_human", "unanswered_twice", "other")
+
+
+def ping_slot_used(notified_kinds: list[str], kind: str) -> bool:
+    """True if this kind's Slack slot is taken. new_lead, hot_lead and escalation share one."""
+    if kind in LEAD_PING_KINDS:
+        return any(k in LEAD_PING_KINDS for k in notified_kinds)
+    return kind in notified_kinds
+
+
+def _pretty(value: Any) -> str:
+    """Choice answers are stored as snake_case ("1_3_months"). People read "1-3 months"."""
+    if not isinstance(value, str):
+        return str(value)
+    value = re.sub(r"(?<=\d)_plus\b", "+", value)
+    return re.sub(r"(?<=\d)_(?=\d)", "-", value).replace("_", " ")
+
+
+def _claim_corpus(ctx: ToolContext) -> str:
+    """Knowledge base plus the company's own qualification wording. Asking "within 1-3 months or
+    3-12 months?" offers the configured choices. It does not promise anything."""
+    parts = [d.text for d in ctx.bundle.knowledge]
+    for f in ctx.bundle.qualification.required_fields:
+        parts.append(f.question)
+        for o in f.options:
+            text = re.sub(r"(?<=\d)_(?=\d)", "-", o).replace("_", " ")
+            parts.append(text)
+            parts.append(
+                re.sub(r"\b(\w+)\b", lambda m: NUMBER_WORDS.get(m.group(1), m.group(1)), text)
+            )
+    return "\n".join(parts)
 
 
 def err(message: str, **extra: Any) -> dict[str, Any]:
@@ -272,7 +311,19 @@ def book_appointment(ctx: ToolContext, slot_id: str) -> dict[str, Any]:
     s.booking = booking
     s.rep_id = rep.id
     s.office_id = office.id
-    return {"booked": True, "booking": booking.model_dump(mode="json")}
+    result: dict[str, Any] = {"booked": True, "booking": booking.model_dump(mode="json")}
+    note = ctx.bundle.routing.appointment.confirmation_note
+    if note and s.lead.email:
+        result["confirmation_note"] = note
+        result["instruction"] = (
+            "Include confirmation_note in the confirmation message, word for word."
+        )
+    elif note:
+        result["instruction"] = (
+            "The lead gave no email address. Confirm the booking, then ask for their email so "
+            "the meeting invite can be sent. Do not say an invite was sent."
+        )
+    return result
 
 
 # ------------------------------------------------------------------ 6 send_message
@@ -288,8 +339,7 @@ def send_message(ctx: ToolContext, body: str) -> dict[str, Any]:
     if s.human_takeover:
         return {"sent": False, "blocked": "human_takeover"}
 
-    knowledge = "\n".join(d.text for d in ctx.bundle.knowledge)
-    problems = find_unsupported_claims(body, knowledge, s.inbound_text())
+    problems = find_unsupported_claims(body, _claim_corpus(ctx), s.inbound_text())
     if problems:
         s.add_flag("unsupported_claim_blocked")
         s.log_event("claim_blocked", ctx.clock.now(), problems=problems)
@@ -381,6 +431,8 @@ def notify_rep(
     hot = bool(s.score and s.score.tier == "hot")
     urgent = hot and cfg.notify == "immediate"
     kind = "booked" if s.booking else ("hot_lead" if hot else "new_lead")
+    if ping_slot_used(s.notified_kinds, kind):
+        return {"notified": False, "already_sent": True, "kind": kind}
     who = s.lead.name or s.lead.phone or s.lead.email or "New lead"
     tier = s.score.tier if s.score else "unscored"
     fields: dict[str, str] = {
@@ -396,7 +448,7 @@ def notify_rep(
         fields["Email"] = s.lead.email
     for f in ctx.bundle.qualification.required_fields:
         if f.key in s.fields:
-            fields[f.key.replace("_", " ").title()] = str(s.fields[f.key])
+            fields[f.key.replace("_", " ").title()] = _pretty(s.fields[f.key])
     if s.flags:
         fields["Flags"] = "; ".join(s.flags)
     if s.crm_contact_id:
@@ -446,6 +498,13 @@ def escalate_to_human(ctx: ToolContext, reason: str, details: str | None = None)
         rep, _ = ctx.router.rep(s.rep_id)
         rep_name, mention = rep.name, rep.slack_user_id or rep.name
     who = s.lead.name or s.lead.phone or s.lead.email or "Lead"
+    if ping_slot_used(s.notified_kinds, "escalation"):
+        return {
+            "escalated": True,
+            "reason": reason,
+            "instruction": "Send one short handoff message to the lead, then stop messaging.",
+        }
+    s.notified_kinds.append("escalation")
     ctx.adapters.notifier.notify(
         Notification(
             kind="escalation",

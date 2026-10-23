@@ -755,7 +755,7 @@ export interface components {
              * Kind
              * @enum {string}
              */
-            kind: "new_lead" | "hot_lead" | "booked" | "escalation" | "lead_reply";
+            kind: "new_lead" | "hot_lead" | "booked" | "escalation";
             /** Lead Id */
             lead_id: string;
             /** Mention */

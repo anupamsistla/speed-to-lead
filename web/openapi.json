@@ -977,8 +977,7 @@
               "new_lead",
               "hot_lead",
               "booked",
-              "escalation",
-              "lead_reply"
+              "escalation"
             ],
             "title": "Kind",
             "type": "string"

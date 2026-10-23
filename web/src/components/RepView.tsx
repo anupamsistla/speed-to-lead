@@ -223,43 +223,59 @@ export function BookingCard({
   );
 }
 
+/** HubSpot's sprocket, drawn in the current text color. */
+function HubSpotMark({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden fill="currentColor">
+      <path d="M18.164 7.93V5.084a2.198 2.198 0 0 0 1.267-1.978v-.067A2.2 2.2 0 0 0 17.238.845h-.067a2.2 2.2 0 0 0-2.193 2.193v.067a2.196 2.196 0 0 0 1.252 1.973l.013.006v2.852a6.22 6.22 0 0 0-2.969 1.31l.012-.01-7.828-6.095A2.497 2.497 0 1 0 4.3 4.656l-.012.006 7.697 5.991a6.176 6.176 0 0 0-1.038 3.446c0 1.343.425 2.588 1.147 3.607l-.013-.02-2.342 2.343a1.968 1.968 0 0 0-.58-.095h-.002a2.033 2.033 0 1 0 2.033 2.033 1.978 1.978 0 0 0-.1-.595l.005.014 2.317-2.317a6.247 6.247 0 1 0 4.782-11.134l-.036-.005Zm-.964 9.378a3.206 3.206 0 1 1 3.215-3.207v.002a3.206 3.206 0 0 1-3.207 3.207Z" />
+    </svg>
+  );
+}
+
 export function CrmCard({ detail }: { detail: LeadDetail }) {
   const crm = detail.crm;
   const rows = Object.entries(crm.properties);
   return (
-    <Card title="CRM record" className="col-span-2">
-      <div className="mb-2 flex items-center justify-between">
-        <p className="text-xs text-slate-600">
-          {crm.pipeline} <span className="text-slate-400">›</span>{" "}
-          <span className="font-semibold text-slate-900">
-            {crm.stage ?? "not created yet"}
-          </span>
-        </p>
-        <Badge
-          className={
-            crm.synced
-              ? "bg-emerald-100 text-emerald-800 ring-emerald-200"
-              : "bg-slate-100 text-slate-600 ring-slate-200"
-          }
-        >
-          {crm.synced
-            ? `Written${crm.contact_id ? ` · ${crm.contact_id}` : ""}`
-            : "Preview"}
-        </Badge>
+    <section aria-label="CRM record" className="card col-span-2 overflow-hidden">
+      <div className="flex items-center gap-2 bg-[#ff5c35] px-4 py-1.5 text-[13px] font-bold text-white">
+        <HubSpotMark className="h-4 w-4" />
+        <span>HubSpot</span>
+        <span className="font-normal opacity-90">CRM record</span>
       </div>
-      {rows.length === 0 ? (
-        <p className="text-sm text-slate-500">Nothing to write yet.</p>
-      ) : (
-        <dl className="grid grid-cols-[minmax(0,10rem)_1fr] gap-x-3 gap-y-1 text-xs">
-          {rows.map(([k, v]) => (
-            <div key={k} className="contents">
-              <dt className="truncate font-mono text-slate-500">{k}</dt>
-              <dd className="break-words text-slate-900">{String(v)}</dd>
-            </div>
-          ))}
-        </dl>
-      )}
-    </Card>
+      <div className="p-4">
+        <div className="mb-2 flex items-center justify-between">
+          <p className="text-xs text-slate-600">
+            {crm.pipeline} <span className="text-slate-400">›</span>{" "}
+            <span className="font-semibold text-slate-900">
+              {crm.stage ?? "not created yet"}
+            </span>
+          </p>
+          <Badge
+            className={
+              crm.synced
+                ? "bg-emerald-100 text-emerald-800 ring-emerald-200"
+                : "bg-slate-100 text-slate-600 ring-slate-200"
+            }
+          >
+            {crm.synced
+              ? `Written${crm.contact_id ? ` · ${crm.contact_id}` : ""}`
+              : "Preview"}
+          </Badge>
+        </div>
+        {rows.length === 0 ? (
+          <p className="text-sm text-slate-500">Nothing to write yet.</p>
+        ) : (
+          <dl className="grid grid-cols-[minmax(0,10rem)_1fr] gap-x-3 gap-y-1 text-xs">
+            {rows.map(([k, v]) => (
+              <div key={k} className="contents">
+                <dt className="truncate font-mono text-slate-500">{k}</dt>
+                <dd className="break-words text-slate-900">{String(v)}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
+      </div>
+    </section>
   );
 }
 

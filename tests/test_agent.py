@@ -527,15 +527,13 @@ def test_human_takeover_silences_the_agent(make_agent, new_lead):
     assert agent.registry(s).call("send_message", {"body": "x"})["blocked"] == "human_takeover"
 
 
-def test_lead_reply_after_takeover_pings_the_rep(make_agent, new_lead):
+def test_lead_reply_after_takeover_sends_no_extra_slack_message(make_agent, new_lead):
     agent, llm, ad = make_agent([reply(tool_use("send_message", body="Hi!")), reply(text("."))])
     s = agent.handle_lead(new_lead())
     agent.takeover(s)
     before = len(ad.notifier.sent)
     agent.handle_inbound(s, "Can you do Thursday instead?")
-    [n] = ad.notifier.sent[before:]
-    assert n.kind == "lead_reply" and n.lead_id == s.lead.id
-    assert n.fields["Message"] == "Can you do Thursday instead?"
+    assert len(ad.notifier.sent) == before  # the rep sees it in the Representative View
 
 
 def test_handing_back_lets_the_agent_reply_with_the_handoff_context(make_agent, new_lead):

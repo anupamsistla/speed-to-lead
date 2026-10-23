@@ -22,11 +22,12 @@ from leadagent.agent.prompt import build_system_prompt, first_turn_context, loca
 from leadagent.clock import Clock
 from leadagent.config.schemas import CompanyBundle
 from leadagent.llm import LLM
-from leadagent.models import ConsentStatus, Lead, Message, Notification, ToolCall
+from leadagent.models import ConsentStatus, Lead, Message, ToolCall
 from leadagent.retrieval import BM25Retriever, Retriever
 from leadagent.routing import Router
 from leadagent.session import LeadSession
 from leadagent.tools import ToolContext, ToolRegistry
+from leadagent.tools.impl import ping_slot_used
 
 log = logging.getLogger("leadagent.agent")
 
@@ -123,8 +124,6 @@ class LeadAgent:
 
         if session.human_takeover:
             session.log_event("ignored_human_takeover", now)
-            if text:
-                self._notify_lead_reply(session, text)
             return
         if text and guardrails.detect_opt_out(text):
             self._opt_out(session)
@@ -198,28 +197,6 @@ class LeadAgent:
         session.log_event("agent_resumed", self.clock.now())
 
     # ------------------------------------------------------------------- internals
-    def _notify_lead_reply(self, session: LeadSession, text: str) -> None:
-        """The agent is silent after a takeover, so tell the rep that the lead wrote back."""
-        rep, office = self.router.rep(session.rep_id) if session.rep_id else (None, None)
-        who = session.lead.name or session.lead.phone or session.lead.email or "A lead"
-        fields = {"Message": text[:300], "Rep": rep.name if rep else "Unassigned"}
-        if office:
-            fields["Office"] = office.name
-        if session.lead.phone:
-            fields["Phone"] = session.lead.phone
-        self.adapters.notifier.notify(
-            Notification(
-                kind="lead_reply",
-                channel=self.bundle.routing.slack_channel,
-                title=f"{who} replied",
-                fields=fields,
-                mention=rep.slack_user_id if rep else None,
-                lead_id=session.lead.id,
-                rep_id=rep.id if rep else None,
-                created_at=self.clock.now(),
-            )
-        )
-
     def _emit(self, session: LeadSession, msg: Message) -> None:
         if self.on_message:
             self.on_message(session, msg)
@@ -494,7 +471,7 @@ class LeadAgent:
                     {"summary": self._auto_summary(session), "stage_event": "created"},
                 )
             needed = "booked" if session.booking else ("hot_lead" if score.tier == "hot" else None)
-            if needed and needed not in session.notified_kinds:
+            if needed and not ping_slot_used(session.notified_kinds, needed):
                 self._backstop(session, "notify_rep", kind=needed)
                 reg.call("notify_rep", {})
 

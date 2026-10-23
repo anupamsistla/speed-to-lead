@@ -133,7 +133,7 @@ def test_a_hot_borrower_is_scored_routed_and_booked_with_the_mortgage_config(mor
     reg.call("notify_rep", {})
     [n] = ctx.adapters.notifier.sent
     assert n.channel == "#inbound-leads" and n.fields["Office"] == "Minneapolis Office"
-    assert n.fields["Credit Range"] == "740_plus" and "Mortgage consultation call" not in n.title
+    assert n.fields["Credit Range"] == "740+" and "Mortgage consultation call" not in n.title
 
 
 @pytest.mark.parametrize(
@@ -237,4 +237,4 @@ def test_conversations_never_leak_between_companies(tmp_path):
         )
         assert client.get(cfgs[SLUG]["logo_url"]).headers["content-type"].startswith("image/svg")
         names = {c["name"] for c in client.get("/api/companies").json()["companies"]}
-        assert names == {"Sunrise Solar", "First Lakes Mortgage"}
+        assert {"Sunrise Solar", "First Lakes Mortgage"} <= names  # other prospects may exist

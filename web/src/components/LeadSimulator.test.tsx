@@ -19,7 +19,6 @@ function setup(over: Partial<Parameters<typeof LeadSimulator>[0]> = {}) {
     submitting: false,
     onSubmit: vi.fn(),
     onReply: vi.fn(),
-    onNewLead: vi.fn(),
     scenarios,
     onPlayScenario: vi.fn(),
     ...over,
@@ -120,8 +119,6 @@ describe("LeadSimulator", () => {
     expect(screen.getByRole("status", { name: "Agent is typing" })).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "STOP" }));
     expect(p.onReply).toHaveBeenCalledWith("STOP");
-    await user.click(screen.getByRole("button", { name: "Reset interaction" }));
-    expect(p.onNewLead).toHaveBeenCalled();
   });
 });
 

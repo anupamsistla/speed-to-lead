@@ -406,3 +406,77 @@ def test_get_slots_filters_by_time_of_day(make_ctx):
     am = reg.call("get_slots", {"date": "2026-10-29", "time_of_day": "morning"})
     assert all(ctx.session.offered_slots[s["slot_id"]].start.hour < 12 for s in am["slots"])
     assert "time_of_day" in reg.call("get_slots", {"time_of_day": "midnight"})["error"]
+
+
+# ------------------------------------------------- slack cap, confirmation note, claim corpus
+def test_slack_gets_one_lead_ping_and_one_booked_ping(make_ctx):
+    ctx, reg = make_ctx()
+    qualify(reg)
+    first = reg.call("notify_rep", {})
+    again = reg.call("notify_rep", {"note": "more detail"})
+    assert first["notified"] and not again["notified"] and again["already_sent"]
+    assert len(ctx.adapters.notifier.sent) == 1
+
+    reg.call("book_appointment", {"slot_id": reg.call("get_slots", {})["slots"][0]["slot_id"]})
+    assert reg.call("notify_rep", {})["kind"] == "booked"
+    assert not reg.call("notify_rep", {})["notified"]
+    assert [n.kind for n in ctx.adapters.notifier.sent] == ["hot_lead", "booked"]
+
+
+def test_escalation_shares_the_lead_slot(make_ctx):
+    ctx, reg = make_ctx()
+    qualify(reg)
+    reg.call("notify_rep", {})
+    r = reg.call("escalate_to_human", {"reason": "angry"})
+    assert r["escalated"] and ctx.session.escalated
+    assert len(ctx.adapters.notifier.sent) == 1
+
+    ctx2, reg2 = make_ctx(id="lead2")
+    reg2.call("escalate_to_human", {"reason": "requested_human"})
+    assert [n.kind for n in ctx2.adapters.notifier.sent] == ["escalation"]
+    assert not reg2.call("notify_rep", {})["notified"]
+
+
+def test_booking_carries_the_confirmation_note_only_with_an_email(make_ctx, monkeypatch):
+    note = "A Zoom meeting invite has been sent to your email."
+    ctx, reg = make_ctx(email="jamie@example.com")
+    monkeypatch.setattr(ctx.bundle.routing.appointment, "confirmation_note", note)
+    qualify(reg)
+    r = reg.call("book_appointment", {"slot_id": reg.call("get_slots", {})["slots"][0]["slot_id"]})
+    assert r["confirmation_note"] == note and "word for word" in r["instruction"]
+
+    ctx2, reg2 = make_ctx(id="lead2")  # no email on file
+    qualify(reg2)
+    r2 = reg2.call(
+        "book_appointment", {"slot_id": reg2.call("get_slots", {})["slots"][0]["slot_id"]}
+    )
+    assert "confirmation_note" not in r2 and "no email" in r2["instruction"]
+
+
+def test_booking_has_no_note_when_none_is_configured(make_ctx):
+    ctx, reg = make_ctx(email="jamie@example.com")
+    qualify(reg)
+    r = reg.call("book_appointment", {"slot_id": reg.call("get_slots", {})["slots"][0]["slot_id"]})
+    assert "confirmation_note" not in r and "instruction" not in r
+
+
+def test_asking_the_configured_timeline_choices_is_not_an_unsupported_claim(make_ctx):
+    _, reg = make_ctx()
+    ok = reg.call(
+        "send_message", {"body": "Are you hoping to install within 1-3 months, or 3-6 months?"}
+    )
+    assert ok["sent"]
+    # a duration the company never configured or documented is still blocked
+    bad = reg.call("send_message", {"body": "We can usually finish in 2 months."})
+    assert bad["blocked"] == "unsupported_claim"
+
+
+def test_slack_shows_choice_answers_the_way_people_write_them(make_ctx):
+    ctx, reg = make_ctx()
+    qualify(reg, roof_type="asphalt_shingle", timeline="three_to_six_months")
+    reg.call("notify_rep", {})
+    [n] = ctx.adapters.notifier.sent
+    assert n.fields["Roof Type"] == "asphalt shingle"
+    from leadagent.tools.impl import _pretty
+
+    assert _pretty("1_3_months") == "1-3 months" and _pretty(250.0) == "250.0"
