@@ -120,7 +120,7 @@ describe("LeadSimulator", () => {
     expect(screen.getByRole("status", { name: "Agent is typing" })).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "STOP" }));
     expect(p.onReply).toHaveBeenCalledWith("STOP");
-    await user.click(screen.getByRole("button", { name: "New lead" }));
+    await user.click(screen.getByRole("button", { name: "Reset interaction" }));
     expect(p.onNewLead).toHaveBeenCalled();
   });
 });

@@ -147,6 +147,43 @@ describe("App", () => {
     await waitFor(() => expect(within(trace).getByText("score_lead")).toBeInTheDocument());
   });
 
+  it("resets the interaction back to an empty form", async () => {
+    const user = userEvent.setup();
+    renderApp();
+    await screen.findByRole("heading", { level: 1, name: "Acme Co" });
+    await user.type(screen.getByRole("textbox", { name: "Phone" }), "+13035550142");
+    await user.type(screen.getByRole("textbox", { name: "Message" }), "Interested");
+    await user.click(screen.getByRole("button", { name: "Send lead" }));
+    await screen.findByRole("log", { name: "Conversation" });
+
+    await user.click(screen.getByRole("button", { name: "Reset interaction" }));
+
+    expect(screen.queryByRole("log", { name: "Conversation" })).not.toBeInTheDocument();
+    expect(screen.getByRole("textbox", { name: "Phone" })).toHaveValue("");
+    expect(screen.getByRole("textbox", { name: "Message" })).toHaveValue("");
+    expect(screen.getByRole("region", { name: "Representative View" })).toHaveTextContent("No lead selected");
+    expect(window.location.hash).toBe("");
+  });
+
+  it("toggles dev mode from the header and remembers it", async () => {
+    const user = userEvent.setup();
+    history.replaceState(null, "", "/?dev=1");
+    const { unmount } = renderApp();
+    const sw = await screen.findByRole("switch", { name: "Dev mode" });
+    expect(sw).toBeChecked();
+    expect(screen.getByTestId("dev-header")).toBeInTheDocument();
+
+    await user.click(sw);
+    expect(screen.queryByTestId("dev-header")).not.toBeInTheDocument();
+    expect(sw).not.toBeChecked();
+    unmount();
+
+    history.replaceState(null, "", "/");
+    renderApp();
+    expect(await screen.findByRole("switch", { name: "Dev mode" })).not.toBeChecked();
+    expect(screen.queryByTestId("dev-header")).not.toBeInTheDocument();
+  });
+
   it("shows why a submit failed", async () => {
     const user = userEvent.setup();
     vi.mocked(api.POST).mockImplementation((() => fail(503, "ANTHROPIC_API_KEY is not set.")) as never);

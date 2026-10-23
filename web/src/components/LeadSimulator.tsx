@@ -170,9 +170,14 @@ export function LeadSimulator(p: Props) {
               {p.submitError}
             </p>
           )}
-          <PrimaryButton type="submit" className="w-full" disabled={p.submitting}>
-            {p.submitting ? "Sending…" : "Send lead"}
-          </PrimaryButton>
+          <div className="flex gap-2">
+            <PrimaryButton type="submit" className="flex-1" disabled={p.submitting}>
+              {p.submitting ? "Sending…" : "Send lead"}
+            </PrimaryButton>
+            <GhostButton type="button" onClick={p.onNewLead} disabled={p.submitting}>
+              Reset interaction
+            </GhostButton>
+          </div>
         </form>
       ) : (
         <div className="flex min-h-0 flex-1 flex-col">
@@ -180,7 +185,7 @@ export function LeadSimulator(p: Props) {
             <p className="truncate text-sm font-medium text-slate-800">
               {p.detail?.lead.name ?? p.detail?.lead.phone ?? "New lead"}
             </p>
-            <GhostButton onClick={p.onNewLead}>New lead</GhostButton>
+            <GhostButton onClick={p.onNewLead}>Reset interaction</GhostButton>
           </div>
           <div className="min-h-0 flex-1">
             <ChatThread

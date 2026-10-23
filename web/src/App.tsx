@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   keys,
   useClock,
@@ -27,9 +27,18 @@ import { deriveTimer } from "./timerPhase";
 import { applyBrand } from "./theme/branding";
 import type { LeadIn } from "./types";
 
-const isDev = () =>
-  import.meta.env.DEV ||
-  new URLSearchParams(location.search).get("dev") === "1";
+/** ?dev=1 or ?dev=0 wins, then the saved switch, then on only in the Vite dev server. */
+const isDev = () => {
+  const q = new URLSearchParams(location.search).get("dev");
+  if (q === "1" || q === "0") return q === "1";
+  try {
+    const saved = localStorage.getItem("devMode");
+    if (saved === "1" || saved === "0") return saved === "1";
+  } catch {
+    // storage unavailable: fall through to the default
+  }
+  return import.meta.env.DEV;
+};
 
 function readLeadFromHash(): string | null {
   return new URLSearchParams(location.hash.slice(1)).get("lead");
@@ -37,7 +46,16 @@ function readLeadFromHash(): string | null {
 
 export default function App() {
   const qc = useQueryClient();
-  const dev = useMemo(isDev, []);
+  const [dev, setDev] = useState(isDev);
+  const toggleDev = () =>
+    setDev((on) => {
+      try {
+        localStorage.setItem("devMode", on ? "0" : "1");
+      } catch {
+        // not persisted, still toggles for this session
+      }
+      return !on;
+    });
 
   const companies = useCompanies();
   const [slug, setSlug] = useState<string | undefined>(
@@ -50,6 +68,8 @@ export default function App() {
   const config = useCompanyConfig(activeSlug);
 
   const [leadId, setLeadId] = useState<string | null>(readLeadFromHash);
+  // Bumped on reset so the simulator remounts with an empty form and the first scenario selected.
+  const [resetCount, setResetCount] = useState(0);
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const lead = useLead(leadId);
   const stream = useLeadStream(leadId);
@@ -141,10 +161,30 @@ export default function App() {
             <p className="text-xs text-slate-500">Speed-to-lead agent</p>
           </div>
         </div>
-        <p className="hidden text-xs text-slate-500 lg:block">
-          {config.data &&
-            `${config.data.appointment_kind} · ${config.data.offices.length} offices · pings ${config.data.slack_channel}`}
-        </p>
+        <div className="flex items-center gap-4">
+          <p className="hidden text-xs text-slate-500 lg:block">
+            {config.data &&
+              `${config.data.appointment_kind} · ${config.data.offices.length} offices · pings ${config.data.slack_channel}`}
+          </p>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={dev}
+            aria-label="Dev mode"
+            onClick={toggleDev}
+            className="flex items-center gap-2 text-xs font-medium text-slate-600"
+          >
+            Dev
+            <span
+              className={`relative h-5 w-9 rounded-full transition ${dev ? "bg-slate-800" : "bg-slate-300"}`}
+              aria-hidden
+            >
+              <span
+                className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-all ${dev ? "left-[18px]" : "left-0.5"}`}
+              />
+            </span>
+          </button>
+        </div>
       </header>
 
       {apiDown ? (
@@ -166,6 +206,7 @@ export default function App() {
               <Skeleton lines={6} />
             ) : (
               <LeadSimulator
+                key={resetCount}
                 companySlug={activeSlug}
                 timeZone={config.data?.timezone}
                 detail={detail}
@@ -180,6 +221,12 @@ export default function App() {
                   setLeadId(null);
                   setStartedAt(null);
                   submit.reset();
+                  setResetCount((n) => n + 1);
+                  replay.reset();
+                  reply.reset();
+                  takeover.reset();
+                  resume.reset();
+                  human.reset();
                 }}
                 scenarios={scenarios.data?.scenarios}
                 scenariosLoading={scenarios.isLoading}
